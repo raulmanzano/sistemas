@@ -1,19 +1,4 @@
->>>>>>>Incluir comandos de servicios systemd
->>>>>>>ampliar iptables
->>>>ufw
->>>>ampliar los scripts
->>>>> ampliar la configuracion de apache SSL para indicar lso protocolos y cyphers
->>>>copiar ejemplo de SVN
-Completar esta chuleta con:
-  la de programas
-  Recipes
-  chuleta linux
-  curso de linux
-
->>>>< intentar hacer cosas sin chuleta con el Man y con la documentacion del apache
-
-
-#Usuario root
+# Usuario root
 ````sh
 # cambia al usuario root 
 sudo –i
@@ -100,7 +85,6 @@ ip addr flush <logical name interface>
 ````
 
 ## old way /etc/network/interfaces
->>>>>>>>>>>>>>>>>>>>>>>completar el ejemplo
 
 ### DHCP
 ````sh
@@ -136,7 +120,7 @@ nameserver 202.54.1.30
 sudo apt install net-tools
 ````
 
-##Instalacion de servidor open ssh 
+## Instalacion de servidor open ssh 
 - Ojo hay un  /etc/ssh/ssh_config
 ````sh
 sudo apt install openssh-server
@@ -145,7 +129,7 @@ sudo nano /etc/ssh/sshd_config
 sudo systemctl restart sshd
 ````
 
-##modificacion de paramteros
+## modificacion de paramteros
 ````sh
 sudo nano /etc/ssh/sshd_config
   #cambio de puertos
