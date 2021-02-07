@@ -68,7 +68,7 @@ nano /etc/hosts
 ````
 
 
-##Establecer ip temporales
+## Establecer ip temporales
 ````sh
 sudo ip addr add <IP>/<CIDR> dev <logical name interface>
 ip link set dev <logical name interface> up  //ifup and ifdown no rulan
@@ -104,7 +104,7 @@ gateway 192.168.1.254
 sudo /etc/init.d/networking restart
 ````
 
-###DNS
+### DNS
 ````sh
 sudo nano /etc/resolv.conf
 search myisp.com
@@ -266,7 +266,7 @@ openssl x509 -text -in yourdomain.crt -noout
 ````
 
 # Apache
-##Instalacion
+## Instalacion
 ````sh
 sudo apt-get install apache2 apache2-doc apache2-utils
 #habilitar mod_ssl ; a2dismod para deshabilitar
@@ -280,7 +280,7 @@ sudo httpd –t
 
 ````
 
-##Virtual hosts
+## Virtual hosts
 ````sh
 #directiva para compatibilidad con DNS
 #NameVirtualHost *:* 
@@ -346,7 +346,7 @@ RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
 Redirect permanent / https://www.yourdomain.com
 ````
 
-##Rewrite
+## Rewrite
 - Ejecuta en cascada a no ser que se indique la L
 
 ### ejemplo de redireccion
@@ -389,14 +389,11 @@ RewriteRule .+.(gif|jpg|png)$ - [F]
 - N - Empieza otra vez por el princio
 - R - Redirect con el codigo suministrado
 
-##Autenticacion
+## Autenticacion
 ````sh
 ##ejecutable en  /usr/local/apache2/bin/htpasswd
 htpasswd -c /usr/local/apache/passwd/passwords rbowen
 ````
-
-
-
 ````sh
 <Directory "/usr/local/apache/htdocs/secret">
 AuthType Basic
@@ -408,8 +405,6 @@ Require user rbowen
 #mejor que indicar un usuario
 #Require valid-user
 </Directory>
-
-
 
 <Directory "/usr/local/apache/htdocs/secret">
 AuthType Basic
@@ -439,7 +434,7 @@ Require group GroupName
 </If>
 ````
 
-##Paginas de servicio personalizadas
+## Paginas de servicio personalizadas
 ````sh
 ErrorDocument 500 /cgi-bin/crash-recover
 ErrorDocument 500 "Sorry, our script crashed. Oh dear"
@@ -448,7 +443,7 @@ ErrorDocument 404 /Lame_excuses/not_found.html
 ````
 
 
-#Gestion de usuarios
+# Gestion de usuarios
 - https://ubuntu.com/server/docs/security-users
 ````sh
 sudo adduser/userdel usuario
@@ -466,8 +461,6 @@ sudo adduser/deluser usuario grupo
 cat /etc/group
 ````
 
-
-
 ## propietarios
 ````sh
 #cambiar propietario
@@ -475,7 +468,7 @@ sudo chown -R usuario ruta-directorio
 #cambiar grupo
 sudo chown -R :grupo ruta-directorio
 ````
-##permisos
+## permisos
 ````sh
 sudo chmod XYZ ruta-archivo
 #usuario-grupo-restousuarios
@@ -540,8 +533,6 @@ find . -name "${LOG_TAG}" -type f -mtime +7 | xargs gzip
 )
 ````
 
-
-
 # DHCP
 
 ````sh
@@ -557,16 +548,14 @@ sudo nano /etc/dhcp/dhcpd.conf
   authoritative;
 }
 ````
-
-
-#FTP
+# FTP
 Para el uso anonimo es el usuario ftp
 ````sh
 sudo apt install vsftpd
 nano /etc/vsftpd.conf
 ````
 
-#samba
+# samba
 -El samaba es para mas cosas(impresoras, LDAP) , spero se utiliza para ficheros principalmente
 ````sh
 sudo apt install samba
@@ -583,8 +572,8 @@ sudo chown nobody:nogroup /srv/samba/share/
 sudo systemctl restart smbd.service nmbd.service
 ````
 
-#NFS
-##server
+# NFS
+## server
 ````sh
 sudo apt install nfs-kernel-server
 sudo systemctl start nfs-kernel-server.service
@@ -594,7 +583,7 @@ nano /etc/exports
   /scratch *(rw,async,no_subtree_check,no_root_squash,noexec)
 sudo exportfs -a
 ````
-##cliente
+## cliente
 ````sh
 sudo apt install nfs-common
 sudo mkdir /opt/example
@@ -602,12 +591,10 @@ sudo mount example.hostname.com:/srv /opt/example
 nano /etc/fstab
 ````
 
-
-
 # procesamiento de textos inliner
-##cat 
-##grep
-##cut
+## cat 
+## grep
+## cut
 - c columna
 - f field
 - d delimitador
@@ -615,12 +602,12 @@ nano /etc/fstab
 # trocea por el caracter = y selecciona el segundo
 cut -d'=' -f2
 ````
-##sort
+## sort
 - f considera iguales las mayúsculas y minúsculas.
 - n ordena por valor numérico.
 - r invertirá el orden.
 
-##uniq
+## uniq
 - elimina duplicados 
 - c añade contador de repeticiones
 - i case insensitive
@@ -628,11 +615,11 @@ cut -d'=' -f2
 uniq -c file1
 ````
 
-##wc
+## wc
 - l numero de lineas
 - w numero de palabras
 
-##awk
+## awk
 - procesa textos
 - $0 - toda la linea
 - $1 - primer campo
