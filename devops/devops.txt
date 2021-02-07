@@ -1,0 +1,127 @@
+
+DevOps Course
+
+
+
+https://github.com/wardviaene/ansible-demo
+https://github.com/wardviaene/chef-demo
+https://github.com/wardviaene/play-demo
+https://github.com/wardviaene/docker-demo
+
+Instructions
+AWS Account: https://github.com/wardviaene/ansible-demo/raw/master/misc/AWSAccountCreation.pdf
+
+
+
+
+GIT  (http://danielkummer.github.io/git-flow-cheatsheet/)
+Patron de desarrollo habitual
+Los desarrolladores trabajan en una branchs llamadas Feature, que se hace un merge al final con uan rama llamada Develop (goal develop)
+merge develop back in release (release es un brach temporal antes de psarla al master)
+Master es la principal con tags con las versiones
+
+GIT Resources
+		Creating a new repository
+		mkdir project
+		cd project
+		git init
+		git remote add origin git@github.com:yourlogin/your-repo.git
+		git add .
+		git commit -am “new repository”
+		git push -u origin master
+		Cloning existing repository
+		git clone https://github.com/username/your-repo.git
+		Creating branch
+		git checkout -b feature-1
+		# you are now in a branch, you can edit and create new files
+		git add .
+		git commit -am “new feature”
+		Merging branch to master
+		git checkout master
+		git merge feature-1
+		git push
+		Deleting branch
+		git branch -d feature-x
+		List all branches
+		git branch -a
+		Switch branch
+		git checkout feature-x
+		Switch to master branch
+		git checkout master
+		Listing Remote repositories
+		git remote -v
+		Replacing remote repository
+		# in case your remote repository changes, or you want to switch from HTTPS->SSH or SSH->HTTPS
+		git remote remove origin
+		git remote add origin git@github.com:yourlogin/your-repo.git
+		More resources
+		git commands: https://www.atlassian.com/git/tutorials/comparing-workflows/
+		git flow: http://danielkummer.github.io/git-flow-cheatsheet/
+
+Provisioning configuration management____________________________________________
+	Provisioning is working with virtual machines
+	Configuration is putting the software into (better with automation)
+		Automation tools -> chef, puppet , ansible, saltstack
+PRovisionning_________________________________________________
+On-premise, on-cloud, hybrid
+VMware/XEN,kvm/hyperV instances
+MAnaged with software like Openstack
+Cloud providers-> Amazon AWS, Azuere, Google cloud, digital Ocean
+
+IaaS - Infrastructure as a Service
+	Cloud provider will provisione a virtual sevver. You need mantais OS
+DBaaS - Database as a Service
+	Only manage de database
+PaaS - Plataform as a Service
+	DO not need to manage OS.
+	Only deploy software
+	Ejemplos:
+		AWS -slastick XXXX que es un 
+		Hiroku
+Plan and monitor______________________________________________________
+Debe de haber una correspondencia entre la metodologia de los desarrolladores y las operaciones
+	Scrum 
+		-Todas las tareas deben ser registradas en un sistema central.Ej:JIRA
+		-todos los dias hay una reunion rapida para identificar bloqueos
+		-Las tareas deben ser divididas en una jornada de trabajo
+		-los sprints duran unas semanas
+		-Existen demos de los sprints
+
+La idea es simplificar el ciclo de vida de desarrollo:
+
+Developer -> build ->(plan)-> Test ->(Monitor)->Release-> (provision/deploy)->Customer
+
+vagrant _____________________________
+wrapper around the viertual machines
+Vagrant from command line
+	Vagrant file - que recrea la configruacion
+	Se sincronizan ficheros entre el guesped y el anfrition
+
+Configuration Management tools________________________________________
+	Puppet
+	Chef  - con cliente - mas poderoso un poco complejo //basicamente es mejor porque almacena el estado
+	Ansible (newer easy)  - con ssh (no necesita cliente) - mas simple menos poderoso
+	Saltstack
+
+Ansible________________________________________________
+Hay un servidor con ansible que se conecta con ssh al resto de servicodees para configurarlos
+	hace un push de las configuraciones
+
+PLaybooks ficheros yml con instrucciones de instalacion, tienen reglas
+Se puede usar ansible como una parte de Vagrant
+Se puede usar ansible para ejecutar en AWS
+Ansible tienen roles d eejecucion (perfiles)
+Ansible tower (es de pago) funcionalidades adicionales: dashboard, satados, seguridad y soporte
+		La version opensource de esto se llama Sepaphore
+
+>>> hay unas buenas practicas en los videos del curso
+
+Chef_______________________________________________
+
+Igual que ansible, pero permite otras configuraciones
+como ejecutarlo en aws
+
+usa recipes files
+Trambien se peude ejecutar desde Vagrant
+
+Continous integration___________________________________________

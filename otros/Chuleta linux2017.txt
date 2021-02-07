@@ -1,0 +1,368 @@
+Estructura de directorios_______________________________________________
+
+/ “Root,” the top of the file system hierarchy.
+/bin Binaries and other executable programs.
+/etc System configuration files.
+/home Home directories.
+/opt Optional or third party software.
+	/opt/xxx/bin
+	/opt/xxx/etc
+	/opt/xxx/lib
+	/opt/xxx/log
+/tmp Temporary space, typically cleared on reboot.
+/usr User related programs.
+/usr/bin binarios y ejecutables del usuario
+/usr/lib libraries
+/usr/local software instalado localmente que no es parte del systema
+	/usr/local/xxx/bin
+	/usr/local/xxx/etc
+	/usr/local/xxx/lib
+	/usr/local/xxx/log
+/usr/sbin
+/var Variable data, most notably log files.
+/var/log
+/boot Files needed for boot the operate system (GRUB y LILO)
+/cdrom Mount point
+/media Mount point
+/cgroup Control Groups hierarchy
+/dev devices controled by the operating system
+/export shares filesystem
+/lib System liraries
+/lib64 System liraries
+/lost+found recuperacion de ficheros
+/mnt to mount external filesystem
+/proc information about processes
+/sbin system adminitration binaries
+/selinux informacion about SELinux
+/srv data served by the system
+	/srv/www
+	/srv/ftp
+	/srv/sys
+/sys related to the linux kernel
+COMMANDS _______________________________________________________________
+
+ls,cd,pwd,cat,echo,man,exit,clear
+which - localliza los ejecutables y el orden de ejecucion
+man -k SEARCH_TERM
+mkdir directory (-p para estructuras completas)
+rmdir directory (-p para estructuras completas)
+rm -rf directory
+ls -a(all) -l(long) -F(tipos) -t(ordenado por tiempo) -c(color no necesario)
+	ls -la
+tree -d(solo directorios) -C(colorized)
+rm,cp,mv
+sort 
+	-k F (ordena por el campo F
+	-r reverse order
+	-u unique
+tar options origen -f destino
+	c create
+	x extract
+	t display table of contents
+	v verbose
+	z compresion 
+	f file el archivo
+gzip,gunzip 
+gzcat,zcat concatenate com'pressed files
+du -h -> disk usage en formato humano
+	-K en kilobytes
+file -> informacion sobre el fichero
+touch, crea el fichero o lo modifica (solo la fecha)
+shutdown, reboot, poweroff
+patterns wildcards ___________________________________
+	* - cualuqiera cosa
+	? - un caracter
+	[] - opcional
+	! negacion
+	- en un acaracter a otro a-z
+	[[:alpha:]], etc
+	\ - caracter de escape
+	
+
+VARIABLES DE ENTORNO______________________________________
+$PATH
+$PS1 - prompt
+echo 'export PS1="\u@\h \w]\$"'>> ~/.bash_profile  //para cambiar el propt del usuario
+
+EDITOR - variable que almacena el editor por defecto
+
+printenv  -muestra todas las variables
+
+PERMISOS/MODOS________________________________
+
+[tipo][permisos user, permisos group, permisos other]
+tipo(- archivo,d directorio,x ejecutable)
+permisos(- r w x )
+
+Symbolico o numeric notation
+	grupo (ugoa)
+
+Numeric es la grapa de siempre
+	700 - solo usuario
+	755 - ejecutable por todas solo editable por usuario o grupo
+	664 - modigicable por usuario y grupo , leible por todos
+	777 y 666 es malo, permisos total
+
+groups xxx -> muestra lso grupos de un usuario 
+chmod grupo[+-]permiso (EJ:chmod u+rwx,g-x fichero)
+chgrp -> cambiar de grupo
+umask -> mascara de permismos para funcionar por defecto
+	-S para simbolic
+	el primer caracter indica especial modes (avanzado)
+	0022,0002,0077,0007
+
+EDITORES_____________________________________________
+nano, joe
+vi________
+vi - funciona con 3 modos, comandos(escape), insert mode(i,a) y line mode(:)
+mover el cursor hjkl
+
+insertar i en el cursor(I al inincio), a despues del cursos, (A al final)
+x delete a caracter escribiendo
+
+dW borra una palabra
+dd delete a line
+D delete from the current position
+r remplace caracter
+cW change a word
+cc change curren line
+c$ change from current position
+yy - Yank(copy) the current line
+p paste
+u undo
+CTRL+R redu
+/ pattern - search
+	? pattern - reverse search
+	n y N para desplazarse
+
+
+
+:w y :w! guarda
+:q quita, :q! quita sin guardar
+:wq! es lo mismo que :x
+:n posicionarse en linea
+:$ al final
+:set nu - activa numeros de linea (nonu desactiva)
+:help
+
+emacs____
+C- control
+M- Alt
+
+C-k cut
+c-y paste
+c-x u undo
+c-s search
+c-r reverse search
+
+
+Compare files___
+diff
+sdiff	side by side
+vimdiff resaltado 
+
+find _______________________________________
+
+find
+	-name *Ejemplo - 
+	-iname *ejemplo - pattern ignore cases
+	-ntime +10 -ntime -13 -> mas de 10 dias y menos de 13
+	-size +1G - mas de un giga
+	-newer xx - newer than the file xxx
+	-typoe d -> directorios
+	-exec command {} \; - run commend against the files
+locate (busca en un indice) puede no estar indexado
+
+I/O________________________________________
+stin 0
+stdout 1
+stderr 2
+>> append
+>
+< redirect input
+/dev/null salida nula
+
+ficheros de texto_____________________
+
+grep pattern file -> saca las lineas que cumplen el patrón
+	-i ignore case
+	-c count
+	-n line numbers
+	-v inverted
+cut 
+	-d delimitter
+	-f N display de nth field
+
+strings saca el contenido textual de un fichero binario
+SCP SFTP __________________________________
+sftp
+	l delante de los commnados locales
+scp ruta origen user@servidor:rutaDestino
+	si no se pone usuario pilla el local
+JOBS y PROCESSES________________________________
+ps
+command & - start command in the background
+CTRL-C - kill de process
+CTRL-Z - suspend the process
+
+bg [%num] - envia al background a suspended process
+fg [%num] - trae a alante
+kill PID - mata el proceso
+jobs [%num] list jobs
+CRON______________________________________
+
+minuto hora dia mes año commando
+
+crontab file
+crontab -l -> lista 
+crontab -e -> edita
+crontab -r -> borra
+
+SUDO_________________________
+su - (con guion cambia las variables de entorno del usuario ambien)
+sudo -l -> lista los correos
+sudo -u user command
+sudo su - (con el - cambia a root con el envoroment del root
+visudo /etc/sudoers -> ficheros con permisos
+	
+HISTORY_______________________________
+history
+~/.bash_history
+~/.history
+~/.histfile
+HISTSIZE -> variable de entorno que guarda el numero de comandos
+
+!N ejecuta el comando numero N
+!! ejecuta el ultimo
+!string ejecuta el que el ultimo comando qu eempieza con string
+APT_______________________________
+
+apt-cache search string ->buscar
+apt-cache show package ->informacion
+apt-get install [-Y] package ->instalar
+	sudo apt-get install plexmediaserver --only-upgrade -> para actualizar un paquete solo	
+apt-get remove package ->eliminar
+apt-get remove purge ->eliminar configuraciontambien
+
+
+
+
+dpkg -l -> list all packages
+dpkg -i package.deb ->install
+
+SYSTEM LOG___________________________________________
+
+facilities and severities
+
+syslogd/rsyslog/syslog-ng -> daemons del syslog segun distribucion
+/etc/rsyslog.conf
+	Selector(falility.severity)(separados por comas para varios) y accion (con guion implica cacheado)
+logger -p mail.info -t mailtest "Test"
+	genera en el mail.log algo como :  fecha linuxsvr mailtest:test.
+
+/etc/logrotate.conf
+	ununtu /etc/logrotate.d/rsyslog
+	logrotate -fv /etc/logrotate.conf -> para ejecutar
+
+PARTITIONS____________________
+MBR - viejo
+GPT - nuevo y van a cambiar tambien la BIOS
+fdisk 
+	-l display devices
+	sacar la ayuda y crear las particiones MBR. Hay opcion tambien para crear una particiones GPT
+mkfs - crear un sistema de ficheros en una particion
+	mkfs -t TYPE DEVICE
+mount(umount) DEVICE MOUNT_POINT
+	mount /dev/sdb3 /opt
+df -h (disk free, para calcular el espacio libre)
+/etc/fstab
+	para persistir los mount point
+	se pueden identificar las particiones de varias maneras
+	ruta, UUID o LABEL
+		lsblk -f para sacar las etiquetas
+		sudo blkid para sacar los UUID		
+e2label /dev/sbd3 opt
+	para etiquetar las particiones
+mkswap /dev/sdb1 -> para crear particiones de intercambo
+
+GRUPOS Y USUARIOS__________________________________
+/etc/passwd -> los pass ya no están aqui
+/etc/shadow
+UID del root es 0
+Se estable el shell a jecutar por el usuario( o el programa)
+Se pueden crear usuarios del sistema que no permiten login interactivo
+useradd [options] username
+	-c comments
+	-m create home directory
+	-s /shell/path
+	-g default group
+	-G group1,gropu2
+passwd user -> establecer el password
+/etc/shel -> directorio plantilla para los directorios de usuario
+userdel 
+usermod
+/etc/group -> definicion de grupos
+/etc/gshadow -> grupos especiales
+
+groups user
+groupadd groupdel groupmod
+
+NETWORKING________________________________________________
+ip addr
+ifconfig (deprecated)
+FQDN -> full qualified name
+hostname
+	-f completo
+/etc/hostname (donde se almacena el nombre local)
+host, dig -> para sacar el dns de maquinas
+/etc/hosts
+/etc/nsswitch.conf -> almacena el orden de resolcion de los DNS
+/etc/services -> maps port numbers with names
+
+DHCP_____________________________
+
+/etc/network/interfaces
+auto  eth0
+iface eth0 inet dhcp
+
+PARA IP fija
+/etc/network/interfaces
+auto  eth0
+iface eth0 inet static
+	adress xx.xx.xx.xx
+	netmask  xx.xx.xx.xx
+	gateway xx.xx.xx.xx
+
+Se puede asignar tambien todo con el comando ip (tambien se puede hacer con ifconfig)
+	ip adress add [IP] dev [NETWOTKDEVICE]	
+	ip link set eth0 up ->para habilitarlo
+
+ifup eth0 (habilita)
+ifdown  eth0(desabilita)
+
+Para investigar problemas
+	ping, traceroute/tracepath, netstat,tcpdump(sniffing), telnet
+
+SPECIAL MODES  SETUID, stickybit , etc______________________________
+Ignorado
+
+KUNFU______________________________________________
+
+gksudo
+
+TAB para completar comandos y parametros
+sudo !! 
+	repite el ultimo comando con sudo
+!string
+	repite el ultimo comando que empiece por string
+"!*"
+	para utilizar los parametros del ultimo comando
+"!$"
+	utiliza el ultimo parametro del ultimo comando
+grep -Ev '^#|^$' conflife.conf
+	muestra el fichero de configuracion sin comentarios
+
+
+	
+
+

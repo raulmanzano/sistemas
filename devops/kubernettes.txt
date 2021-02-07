@@ -1,0 +1,192 @@
+
+Kubernetes
+-Orquestación de docker containers (similar to Docker Swarm o Mesos)
+-on premise, cloud o mixto
+
+Minikube -local single VM machine con un cluster kubernetes de un solo nodo
+Kops - high available cluster on AWS
+
+Minikube
+	instalacion en  en https://github.com/kubernetes/minikube
+	cuando se ejecuta minikube start configura informacion en el perfil del usuario
+	se necesita tambien kubectl https://storage.googleapis.com/kubernetes-release/release/v1.7.0/bin/windows/amd64/kubectl.exe
+
+	minikube start
+
+	Arranca (e importa) una maquina virtual
+		kubectl run hello-minikube --image=grc.io/google_containers/echoserver:1.4 --port=8080
+	Expoen la makina en el cluster
+		kubectl expose deployment hello-minikube --type=NodePort
+
+	se pregunta por la url al servicio (puede tardar al tener que traer la imagen)
+		minikube service hello-minikube --url 
+
+	minikube stop para parar el cluster
+
+Kops
+	>>> me lo salto
+
+_____________________________SUBIR UUNA IMAGEN AL REPOSITORY (DOCKERHUB) 
+
+Subirla una vez creada
+	docker login
+	docker tag imageid your-login/dockerdemo
+	docker push your-login/docker-demo
+Subirla cuando se crea
+	docker build -t yourlogin/nombredirectorio
+	docker push yourlogin/nombredirectorio
+
+___________________________________ Como construir aplicaciones solidas para la nuve
+https://12factor.net/
+
+__________________________________COMO EJECUTAR las apicaciones del repositorio on kubernetes
+	Hay que crear un pod - que contiene uno o mas contendeores para ejecutarse. Se comunican por sus puertos
+		pod.yml
+	usar kubectl para crear el pod en el kluster kubernetes
+		kubectl create -f usuario/pod.yml
+kubectl get pod - information of all running pods
+kubectl describe pod <pod> - info
+kubectl expose pod <pod> --port444 --name=frontend    //crea un nuevo servicio en ese puerto
+kubectl port-fordward <pod> 8080 //port fordward to your local machine
+kubectl attach <podname> - i   //attach to the pod
+Kubectl exec <pod> --command   //execute un command en el pod
+Kubectl label pods <pod> mylabel=xxxxx    //poner etiqueta al pod
+kubectl run -i --tty busybox --image=busybox --restar=never --sh  //entrar al shell
+
+
+_____________________EXISTE un tipo de load balancing para clusters en aws, sin tener qu econfigurarlo con nodos.
+	Se declara en el yml
+
+_________________Esclaado
+	Si la aplicacion es stateless , se puede escalar horizontalmente 
+		no escribe ficheros
+		Las bases de datos son statefull (con estado)
+		Si se necesita mantenimiento de sesion para las webs debe hacerse fuera
+	se puede escalar las stateful, apoyandose en volumenes para almacenar cosas.
+		no se pueden escalar horizontalmente, pero si meterlas dentro del mismo pod y escalarlas verticalmente aumentando recursos
+_______	Replication controller (para el escalado en kubernettes)
+		se asegura que las repliucas estan funcionanado
+		se recomiendo autilizarlo aunque sea con 1 replica solo, para asegurarse que esta funcionanado siempre
+_________	Replication Set (mejor que el replication controler) mejor lara despliegue 
+		soporta filtering
+		Create (hacer el deploy) update (actualizar la version) o rolling updates, roll back, pause , resume
+
+		kubectl get deployments >>>>informacion de lso actuales
+		kubectl get rs>>> informacion sobre los replicasets
+		kubectl get pods --showl-labels >>>> informacion sobre los pods u las label
+		kubectl  rollout status deployment/hellowolrd >>> get thet status of deployment
+		kubectl set image deployment/hellowolrd k8s-demo=k8s-demo:2 >>run la imagen en la version 2 (update)
+		kubectl edit deployment/hellowolrd  >>edit the deployment object
+		kubectl rollout status
+		kubectl rollout history
+		kubectl rollout undo deployment/hellowolrd   >>> a la version anterior
+		kubectl rollout undo deployment/hellowolrd --to-revision=n  a la version n
+
+_________________Services
+	los pods son dinamicos y pueden crearse y destruirse con el replication controller o con los deployments
+	kubectl explose >>> crea un servicio y lo expone al exterior
+		clusterip >> ip solo accesible desde el cluster
+		NodePort >>> la misma en cada nodo que es accesible desde fuera
+		loasbalabcer >>> creada fuera de los nosdos por el cloud provider (ELB o AWS)
+		externalname >>DNS por el servicio (el DNS add-on tiene que estar activado)
+________________labels
+	Son como tags de otros sistemas como AWS
+	Son pares clave valor que se pueden añadir a los objetos Ejemplo : enviromnet=dev
+	para nodos, pods, etc 
+	para utilizar lso filtros con ellos
+		Ejemplo : ejecutar los pods en nodos concretos
+			Poner label al nodo
+				kubectl label nodes node1 hardware=high-spec
+			Establecer un filtro en el pod.yml
+				nodeSelector:
+					hardware:high-spec
+			Si no hay matching, los despliegues quedan pendientes y no avaliable
+_______________________Health checks
+	Para detectar si la aplicacion esta funcionaando correctamente en el nodo
+		running a command inte container periodically
+		check a URL
+	directivas en el YML
+________________________Secrets 
+	Una manera de distribuir claves y credenciales to the pods
+	Hay muchas maneras de hacerlo:
+		como variables de entorno
+			se definene en el yml , la variable con la clave y el secreto para buscar el valor
+		como un fichero de un volumen
+			se define en el yml , el volumen y el secret. debe existir una estructura de ficheros con las claves y el contenido el valor
+			Es lo que utiliza kubernetes para sus secrets
+		desde una image
+	PAra generarlos
+		using files:
+			echo -n 'root' > ./username.txt
+			echo -n 'password' > ./password.txt
+			kube ctl create secret generic db-user-pass --from-file=./username.txt ---from-file=./password.txt
+			secret 'db-user-pass' created
+		puede ser una clave ssh
+			kubectl create secret generic ssl-certificate --from-file=ssh-privatekey=~/ssh/d_rsa --ssl-cert=mysslcert.crt
+		pueden definirse en el yaml (pero los valores hay que ponerlos en base 64)
+			echo-n 'root' | base64  >>>pasa a base 64 un valor
+			kubectl create -f secrets-db-secret.yml  >>>para crear los secrets una vez están en el yml
+
+____________________________webUI
+	para sustituir a kubctl
+	hay varias maneras de arrancarlo
+
+
+_________________________Service discovery con DNS
+	to find services en el mismo cluster
+	DNS is built-in desde 1.3 
+		los addons estan en /etc/kubernetes/addons del master node
+	Los contenedores de un mismo pod se ven directamente por lo que no necesitan este servicio
+		con localhost:port
+	host app1-service >>> devuelve la dirección de donde se encuentra
+	app2-service.default.svc.cluster.local	
+		default >> es el namespace por defecto
+		>> funcona añadiendo un dns resolver en el nodo 10.0.0.10 en el /etc/resolv.conf
+_______________________configMap
+	parametros de ejecuacion que no son un secret
+	pares claves valor
+		en variables de entorno
+		argumentos de la linea de comandos 
+		o usando volumenes
+	puede contener ficheros de configuracion completos
+		puede se montada como un volume donde la palicacion lo espera
+	kubectl crerate configmap app-config --from-file=app.properties
+____________________________Ingress
+	allows inbound connectios to the cluster, para exponer servicios
+	una alternativa al loadbalancer y los nodeports
+	Define reglas para poner DNSs falsos y a donde atacar
+______________________________persistent volumes
+	Volumes permite enlazar almacenamiento externo
+	persistent volumens permite poner un volumen aunque se pare el contenedor
+	Se hacen con volumen plugins
+		AWS Cloud (EBS storage)
+		Google Cloud (Google disk)
+		Microsoft Cloud (Azure)
+		NetworkStorage
+			NFS
+			CEPHFS
+______________________________volumen autoprovisioning
+
+The object StrongeClass Object permite el aprovisionamiento antes de hacer el attach a un nodo
+	kubernetes.io/docs/user-guide/persistent-volumes
+	
+______________________________PET SETS
+>>>>es una feature inestable
+stable pod name - genera nombres que no son ramdom
+numera los pods
+para utilizar DNS con los nodos para el autodiscover
+Permite determinar orden de arranque, etc
+___________________________daemos sets
+PAra asegurarse que un pod correo sobre un nodo concreto
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	

@@ -1,0 +1,138 @@
+docker
+Instruccions de instalacion en la pagina
+
+Imagenes que instancian contenedores
+	Los contenedores no tienen estados. se instancian cada vez que invocamos el comando run
+	En realidad las imagenes estan compuestas de capas que indican las modificaciones. el contenedor es una ultima capa reescribible que almacena el estado.
+Imagenes en los registros
+registros (dockerhub) dividdidos en repositorios
+los repositorios tienen tags para versiones, etc
+
+docker images >>> imagenes instaladas
+docker run imagen:tag >>> crea contenedores con la imagen
+docker run imagen comando  >>ejecuta
+	-i -t >>> session interactiva de terminal	
+	-d ejecuta en modo deattach 
+	--rm lo elimina cuando termina
+	--name nombra el contenedor
+	-p hostPort:conteinerPort >> mapea lso puertos para que no haya conflictos
+	Ej: 	sudo docker run -d -p 5000:5000 34nio134bn3124ub
+
+docker-machine ls >> Muestra las maquinar virtuales (¿contenedores?)
+	Esto no existe en linux
+docker ps >> Muestra contenedores ejecutandose y el comando
+	docker ps -a >> los parados tambien
+docker inspect >>> muestra informacion adicional del contenedor (fichero de logs, etc)
+docker logs container >>> muestra la salida del contenedor si esta arrandaco en modo deattach
+docker history imagen >>>> muestra las capas (layers) con la que esta hecha una imagen
+docker exec -it containerid bash
+	Hace que entremos en el contenedor en el bash
+docker stop <container name>
+
+Creacion de imagenes:
+	modificando una imagen existente 
+		ejecutar la imagen en modo interactivo y hacer lso cambios necesario
+		docker commit container_id newImgeName:tag
+			el container_ID se saca haciendo PS -a
+	o con dockerfiles
+		hay que utilizar un fichero con el nombre Dockerfile (o utilizaer el parametro -f)
+			FROM debian:jessie
+			RUN apt-get update
+			RUN apt-get install -y git
+		Minimizar el numero de comandos RUN concatenando las instrucciones con &&
+		Existen comandos para copiar ficheros dentro del contenedor o descargarlos desde internet
+		docker bulid - newImageName
+Se recomienda utilizar tags siempre para evitar sobresscrituras
+
+Alamcenar imagenes en DockerHUb
+	Se recomienda utilizar tags siempre para evitar sobresscrituras
+docker login --username=manzano
+docket push  repositorio/imagen:version 
+
+>>>>>faltan anotaciones que hice en papel
+>>se pueden crear redes con docker compose
+>>> se pueden realizar extensiones de las yml files del compose, para cambiar ciertas cosas y no duplicar. como por ejemplo cosas del entrono
+
+
+Ejecutar con el compose
+docker-compose run dockerapp python test.py
+	se recomienda tener lso test dentro de la imagen para que sea mas practico
+
+
+Docker networking
+	Closed Network /none network
+		red del contenedor desconectada/aislada sin conexion al exterior
+		docker run -d --net none busybox sleep 1000		
+	Bridge Network
+		por defecto. los conectores estan en la misma red interna
+		se pueden crear subnetworks
+			docker network create --driver bridge my_bridge_network
+			desconectar container de una subred
+				docker network disconnect bridge container3
+	Host network
+		Red abierta con el hosts, muy insegura aunque mas eficiente
+			docker run -d --name container_4 --net hosts buxybox sleep 1000
+	Overlay network
+		Para hacer redes entre contenedores distribuidos (multi hosts)
+			Utiliza docker swam
+
+docker network inspect xxxx(ej:bridge) da informacion de ip, etc
+docker network ls
+
+
+
+Workflow de ejmplo:
+aplicacion->GitHub->circleCI->dockerhub->dockerCloud/aws/azure
+
+>>>CircleCI.com >> integracion continua con Git y docker. ejecuta los compose que tengamos definidos en git
+se puede publicar en dockerhub desde circleci
+se pueden definir variables de entorno en cisclecli  y en el yaml del compose (para passwords, usuarios y TAGSetc)
+
+>>>La opcion usual es utilizar Docker sobre una maquina virtual con "Docker Machine" por si hay problemas de acaparamiento de recursos con los contenedores. 
+>>>Muchos de los proveedores de contenedores en la nuev autilizan maquinas virtuales debajo
+>>>se pueden desplegar las maquinar virtuales directamente en la nue
+	Hay que hacer unso cambios de lso directoriso de las plaicaciones 
+		En lugar de hacer un mount de las aplicaciones en el compose, hay que hacer que se copien en el dockerfile (ya que el directorio no existirá en la maquina virtual destino)
+>>digitalocean.com
+	Maquinar vistuales (similar a amazon aw2 pero mas facil de utilizar)		
+	Tiene una API de acceso que funciona con tokens similar to oAUTH
+
+>>>Docker cloud
+	Maquinas virtuales sobre AWS con nodos Docker cloud que componen un Node Cluster y oferta un Docker Clous service
+		Link to AWS
+		Create docker Hub Node Cluster
+		Create Docker Cloud Service
+			>>>El docker cloud service permite poner encima todos los contenedores que queramos de manera abstrwacto
+		Create Docker Cloud to docker Hub Webhook
+			>>>llamasa a la api para que se despliegue desde dockker hub automates build
+
+
+docker-machine
+	Maneja las maquinas vituales/contenedores. ejecuta lso contenedores pero en las maquinas virtuales remotas que creemos con el driver
+	docker-machine create --driver digitalocean --digitalocean-acess-token dsfasfaefasdfasdf34r23r2df23d23d docker-app-machine
+		Crea maquina virtual con drivers para digital ocean y la sube
+		Hay un monton de parametros para trabajar con el driver
+	docker-machine env docker-app-machine
+		Ver las variables de sistema
+	eval $(docker-machine env docker-app-machine)
+		para entrar en el shell
+	docker info
+		para ver que se creo
+	docker-compose -f prod.yml up -d 
+		ejecutar el compose que lo va a ejecutar remotamente
+	docker-machine ls 
+		Muestra las maquinas virtuales activas (deben salir las remotas tambien)
+
+docker swarm 
+	Gestiona nodos de docker daemon y los hace transparente a usar desde el cliente de docker swarm
+	Server discovery : hace la orquestacion mediante sistemas de clave valor distribuidos: consul o zookeeper	
+	Pasos:
+		paso 1 provisional una maquina para el servidor consul para el clave valor
+		paso 2 :  hacer un docker swam node
+		Paso 3 hacer un docker swam cliente
+		paso 4 definir la red como overlay para el multinodo
+		paso 5 desplegar los servicios sobre el cluster con el docker compose
+
+
+
+Manual práctico de lactancia materna

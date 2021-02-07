@@ -1,0 +1,130 @@
+Instalacion y acceso
+	Instalar, es una aplicación sobre un tomcat.
+		instalar plugins necesarios "manage jenkins/manage plugins"
+	Usuario admin, password la de instalacion o se puede recuperar una en el archivo 
+		sudo less /var/lib/jenkins/secrets/initialAdminPassword
+	Configurar JDK, GIT y MAVEN en "manage jenkins/global tool configuration"
+
+NUevo proyecto
+	New Item
+	Seleccionar GTI, entorno Maven y maven Goal(validate/compile/test/package/verify/install/deploy)
+Ejecutar 
+	Built desde la pantalla principal 
+	Logs en cada compilacion, en el /var/log o en http://localhost:8080/log/all
+	utliza el directorio que indica en los logs /var/lib/jenkins/workspace/example maven-project
+	En el elemento, podemos configurar cuando queremos que se haga el poll desde git con una periodicidad cron
+		La direccion Git debe tener siemrpe el .git, para que haga el poll correctamente
+
+Generar una clave SSH para el GITHUB
+	https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/			
+	https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/
+		ssh-keygen -t rsa -b 4096 -C "raulmanzanoiglesias@gmail.com"
+		eval "$(ssh-agent -s)"    //lo añade al agente
+		ssh-add ~/.ssh/id_rsa	//añade la identidad al agente
+
+Intenresantes plugins a añadir en pa parte de post proceso
+	checkstyle
+	PMD
+	Findbugs
+
+Deploy
+	En una post accion de la configuración del correo, hay que poner lo que quenemos almacenar
+		**/*.war
+	Configurar el tomcat externo 
+		cambiar permisos de los scripts, puertos y usuarios del tomcat
+			<role rolename="manager-script"/>
+  			<role rolename="admin-gui"/>
+  			<user username="tomcat" password="tomcat" roles="manager-script,admin-gui" />
+  	Hay que instalar un nuevo pluging jenkins de "copy elements"
+  	Crear un nuevo item de configuracion
+  		En el build poner "copy from proyect", poner el nombre del otro proyecto y seleccionar lo que queremos copiar "**/*.war"
+  		En post-built action poner el "deploy"
+  			en el war poner "**/*.war"
+  			Seleccionar tomcat 7 (vale para el 8) y rellenar
+  	Enlazamos el proyecto del deploy con el del package, mediante una post acion de est ultimo(que permite poner que se ejecute solo en caso de exito)
+Pipeline
+	se necesita el "Build Pipeline Plugin"
+	>> en la pantalla de los trabajos se pueden añadir diferentes vistas (pipelineview)
+		Seleccionar el primero en 	"Select Initial Job"	
+
+	Parallel
+		por ejemplo el check style
+		Se pone el postbuild action, separadas por comas las tareas que se quiere que se hagan posteriormente en paralelo
+
+	Manual (despliegue a produccion)
+		Se añade un post-build action pero en lugar de "build other projects" se añade "build other projects (Manual)" y se puede ejecutar desde la vista del pipeline
+
+
+
+
+
+
+_____________________--
+maven plugins interesantes (algunos puede ser mejor utilizarlos solo desde el eclipse y desde el jenkins)
+Checkstyle
+	checkstyle:checkstyle
+		 <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>2.17</version>
+          <reportSets>
+            <reportSet>
+              <reports>
+                <report>checkstyle</report>
+              </reports>
+            </reportSet>
+          </reportSets>
+        </plugin>
+
+Maven JavaDoc Plugin
+	mvn javadoc:fix
+	<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-javadoc-plugin</artifactId>
+			<executions>
+				<execution>
+					<id>attach-javadocs</id>
+					<goals>
+						<goal>jar</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
+PMD
+pmd:check
+ <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.7</version>
+      </plugin>
+    </plugins>
+  </build>
+
+
+Findbugs
+findbugs:check
+
+<build>
+    <!-- To define the plugin version in your parent POM -->
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>findbugs-maven-plugin</artifactId>
+          <version>3.0.5-SNAPSHOT</version>
+        </plugin>
+        ...
+      </plugins>
+    </pluginManagement>
+    <!-- To use the plugin goals in your POM or parent POM -->
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.5-SNAPSHOT</version>
+      </plugin>
+      ...
+    </plugins>
+  </build>
