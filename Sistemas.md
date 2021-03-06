@@ -275,8 +275,10 @@ sudo a2enmod ssl
 sudo a2ensite 000-default.conf
 sudo a2ensite default-ssl.conf
 sudo systemctl reload apache2
+
 #verificar sintaxis
 sudo httpd –t
+sudo apachectl configtest
 
 ````
 
