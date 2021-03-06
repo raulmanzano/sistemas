@@ -256,7 +256,7 @@ IFS=$OLDIFS
 # OPENSSL
 ````sh
 #generar todo autofirmado completo
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
 #generar clave
 openssl genrsa -out yourdomain.key 2048
 #crear csr
@@ -431,11 +431,17 @@ Require group GroupName
 
 ## Autorizacion
 ````sh
+<Directory "/d2">
 <RequireAll>
     Require all granted
     Require not ip 192.168.205
     Require not host phishers.example.com moreidiots.example
 </RequireAll>
+  <RequireAny>
+  </RequireAny>
+  <RequireNone>
+  </RequireNone>
+</Directory>
 ````
 ````sh
 <If "%{HTTP_USER_AGENT} == 'BadBot'">
@@ -450,6 +456,7 @@ ErrorDocument 500 /cgi-bin/crash-recover
 ErrorDocument 500 "Sorry, our script crashed. Oh dear"
 ErrorDocument 500 http://xxx/
 ErrorDocument 404 /Lame_excuses/not_found.html
+ErrorDocument 403 http://mismodns/pagina402Conpermisos.html
 ````
 
 # Tomcat 9 
