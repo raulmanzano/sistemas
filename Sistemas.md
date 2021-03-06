@@ -277,8 +277,8 @@ sudo a2ensite default-ssl.conf
 sudo systemctl reload apache2
 
 #verificar sintaxis
-sudo httpd –t
 sudo apachectl configtest
+sudo httpd –t
 
 ````
 
@@ -438,6 +438,7 @@ Require group GroupName
 
 ## Paginas de servicio personalizadas
 ````sh
+DirectoryIndex default.html index.html
 ErrorDocument 500 /cgi-bin/crash-recover
 ErrorDocument 500 "Sorry, our script crashed. Oh dear"
 ErrorDocument 500 http://xxx/
