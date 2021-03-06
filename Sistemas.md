@@ -255,6 +255,8 @@ IFS=$OLDIFS
 
 # OPENSSL
 ````sh
+#generar todo autofirmado completo
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
 #generar clave
 openssl genrsa -out yourdomain.key 2048
 #crear csr
@@ -331,9 +333,9 @@ NameVirtualHost *:80
   SSLHonorCipherOrder on
   SSLCompression      off
   SSLSessionTickets   off
-  SSLCertificateFile /path/to/your_domain_name.crt
-  SSLCertificateKeyFile /path/to/your_private.key
-  SSLCertificateChainFile /path/to/DigiCertCA.crt
+  SSLCertificateFile /etc/ssl/private/your_domain_name.crt
+  SSLCertificateKeyFile /etc/ssl/certs/to/your_private.key
+  SSLCertificateChainFile /etc/ssl/certs/DigiCertCA.crt
   # etc...
 </VirtualHost>
 ````
