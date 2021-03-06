@@ -442,6 +442,79 @@ ErrorDocument 500 http://xxx/
 ErrorDocument 404 /Lame_excuses/not_found.html
 ````
 
+# Tomcat 9 
+Se pueden instalar el modulo del manager y el modulo de los examples y del doc.
+
+## Validacion de usuarios
+
+````sh
+sudo nano web.xml
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+        xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+        id="WebApp_ID" version="4.0">
+        <session-config>
+                <session-timeout>30</session-timeout>
+        </session-config>
+        <security-constraint>
+                <display-name>AdminUserConstraint</display-name>
+                <web-resource-collection>
+                        <web-resource-name>Administration</web-resource-name>
+                        <description />
+                        <!-- <url-pattern>/faces/admin/*</url-pattern> -->
+                        <!-- <url-pattern>/admin/*</url-pattern> -->
+                        <url-pattern>/*</url-pattern>
+                        <http-method>GET</http-method>
+                        <http-method>POST</http-method>
+                </web-resource-collection>
+                <auth-constraint>
+                        <role-name>tomcatseguro</role-name>
+                </auth-constraint>
+        </security-constraint>
+
+        <login-config>
+                <auth-method>BASIC</auth-method>
+           <!-- <auth-method>FORM</auth-method> -->
+           	   	<!-- <form-login-config>
+                	 	<form-login-page>/login.html</form-login-page>
+                        <form-error-page>/login.html</form-error-page>
+                     </form-login-config> -->
+        </login-config>
+        <security-role>
+                <description />
+                <role-name>tomcatseguro</role-name>
+        </security-role>
+</web-app>
+````
+
+_____________________________________________
+## Conexion AJP:
+````sh
+#instalar ajp en apache2
+sudo a2enmod proxy_ajp
+
+#configurar virtual host con 
+sudo nano /etc/apache2/sites-enabled/000-default.conf
+<Proxy *>
+        Order deny,allow
+        Allow from all
+</Proxy>
+ProxyRequests           Off
+ProxyPass               /       ajp://127.0.0.1:8009/
+ProxyPassReverse        /       ajp://127.0.0.1:8009/
+
+#habilitar conector tomcat (OJO AL address y al secret)
+   <Connector protocol="AJP/1.3"
+               address="127.0.0.1"
+               port="8009"
+               redirectPort="8443"
+               secretRequired="false"
+               />
+````
+
+
+
+
 
 # Gestion de usuarios
 - https://ubuntu.com/server/docs/security-users
