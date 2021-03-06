@@ -433,11 +433,16 @@ Require group GroupName
 ````sh
 <Directory "/d2">
 <RequireAll>
-    Require all granted
+    Require all granted #esta la hay qu eponer siempre
     Require not ip 192.168.205
     Require not host phishers.example.com moreidiots.example
+    
 </RequireAll>
   <RequireAny>
+    Require ip 127.0.0.1
+    Require ip ::1
+    Requite host localhost    
+    #este bloque Any es equivalente a un RequireAll con un "Require local" detra del "Require all granted"
   </RequireAny>
   <RequireNone>
   </RequireNone>
