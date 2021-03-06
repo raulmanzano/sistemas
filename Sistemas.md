@@ -326,6 +326,11 @@ NameVirtualHost *:80
   ServerName www.yourdomain.com
   DocumentRoot /usr/local/apache2/htdocs
   SSLEngine On
+  SSLProtocol         all -SSLv3 -TLSv1 -TLSv1.1
+  SSLCipherSuite      ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256
+  SSLHonorCipherOrder on
+  SSLCompression      off
+  SSLSessionTickets   off
   SSLCertificateFile /path/to/your_domain_name.crt
   SSLCertificateKeyFile /path/to/your_private.key
   SSLCertificateChainFile /path/to/DigiCertCA.crt
