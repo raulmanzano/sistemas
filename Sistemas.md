@@ -18,7 +18,7 @@ networkctl status
 ip a //hayque buscar lo que hay configurado
 sudo lshw -class network //logical name
 ````
-## Retplan
+## Netplan
 ### DHCP
 ````sh
 nano /etc/netplan/99_config.yaml
