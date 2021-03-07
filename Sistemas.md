@@ -409,7 +409,7 @@ AuthType Basic
 AuthName "Restricted Files"
 # (Following line optional)
 AuthBasicProvider file
-AuthUserFile "/usr/local/apache/passwd/passwords"
+AuthUserFile "/etc/apache2/passwords"
 Require user rbowen
 #mejor que indicar un usuario
 #Require valid-user
@@ -421,7 +421,7 @@ AuthName "By Invitation Only"
 # Optional line:
 AuthBasicProvider file
 AuthUserFile "/usr/local/apache/passwd/passwords"
-AuthGroupFile "/usr/local/apache/passwd/groups" 
+AuthGroupFile "/etc/apache2/groups" 
 #formato ficheros grupos
 #GroupName: rbowen dpitts sungo rshersey
 Require group GroupName
