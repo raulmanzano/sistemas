@@ -186,6 +186,14 @@ sudo iptables --policy INPUT ACCEPT
 #iptables -P INPUT DROP
 sudo iptables --policy INPUT DROP      
 
+#Bloquear una ip 
+sudo iptables -A INPUT -s 15.15.15.51 -j DROP( o REJECT)
+
+#Permitir acceso solo desde una ip 
+sudo iptables -A INPUT -p tcp -s 15.15.15.0/24 --dport 22 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+sudo iptables -A OUTPUT -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+
+
 ##PAra dejarlo permanente hay variso metodos, usar 
 sudo apt install -y iptables-save
 sudo apt install -y iptables-persistent
