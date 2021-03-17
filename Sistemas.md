@@ -1,3 +1,20 @@
+
+
+#Información 
+````sh
+#exiten paquetes de aplicaciones con el sufijo -doc que añaden elementos en el /usr/share/doc
+apt search XXXX 
+
+#muestra las paginas del man donde aparece el termino
+apropos XXX
+
+#hace busqueda del termino en el man 
+man -wK "termino"
+
+#abre una pagina concreta
+man N comando
+````
+
 # Usuario root
 ````sh
 # cambia al usuario root 
@@ -558,7 +575,9 @@ cat /etc/passwd
 #cambia el home de un usuario
 usermod -d -m /nuevohome/usuario usuario
 
+#Crear grupo
 sudo groupadd/groupdel grupo
+#añadir usuario al grupo
 sudo adduser/deluser usuario grupo
 #Visualizar grupos del sistema
 cat /etc/group
