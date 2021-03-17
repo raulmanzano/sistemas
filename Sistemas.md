@@ -1,6 +1,6 @@
 
 
-#Información 
+# Información 
 ````sh
 #exiten paquetes de aplicaciones con el sufijo -doc que añaden elementos en el /usr/share/doc
 apt search XXXX 
