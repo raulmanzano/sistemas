@@ -176,6 +176,11 @@ sudo systemctl enable ssh
 # hayq ue copiar la publica en el servidor remoto en ~/.ssh/authorized_keys
 #generar la clave
 ssh-keygen -t rsa
+
+ssh-keygen -t rsa -b 4096 -C "eadmon@sic233.XXX.es" -f "/root/.ssh/eadmon@sic233.XXX.es"
+ssh-keygen -t rsa -b 4096 -C "eadmon@sic232.XXX.es" -f "/root/.ssh/eadmon@sic232.xXX.es"
+````
+
 # copia remota del certificado
 ssh-copy-id username@remotehost
 ````
