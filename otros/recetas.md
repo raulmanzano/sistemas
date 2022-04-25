@@ -542,14 +542,14 @@ Se añade el PV al VG existente y se cambia el tamaño del LV y se hace un resiz
  resize2fs -p /dev/mapper/vg_bbdd_2020-lv_bbdd_2020
 ````
  
-##Crear un nuevo VG
+## Crear un nuevo VG
 ````sh
 vgcreate vg_bbdd_2020 /dev/xvdg1
 vgdisplay
 vgs
 ````
 
-##Crear un nuevo LV
+## Crear un nuevo LV
 ````sh
 lvcreate -l +100%FREE vg_bbdd_2020 -n lv_bbdd_2020
 lvs
