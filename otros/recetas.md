@@ -516,7 +516,7 @@ lvdisplay
 
 Inicalmente hay que particionar el disco (primaria como siempre)
 ````sh
-parted --align optimal -s /dev/xvdg "mklabel gpt unit mib mkpart primary 0 100% set 1 lvm on print"
+parted --align optimal -s /dev/xvdg "mklabel gpt unit mib mkpart primary 0% 100% set 1 lvm on print"
 ````
 Los LV salen conel df Hay que revisar si en el VG hay espacion para aumentar
 ````sh
@@ -565,7 +565,7 @@ tune2fs -U random -L "BBDD-2020" /dev/mapper/vg_bbdd_2020-lv_bbdd_2020
 vgs
 vgdisplay vg_bbdd_2020
 lvmdiskscan
-parted --align optimal -s /dev/xvdh "mklabel gpt unit mib mkpart primary 0 100% set 1 lvm on print"
+parted --align optimal -s /dev/xvdh "mklabel gpt unit mib mkpart primary 0% 100% set 1 lvm on print"
 pvcreate /dev/xvdh1; pvdisplay
 vgextend vg_bbdd_2020 /dev/xvdh1
 vgdisplay vg_bbdd_2020
