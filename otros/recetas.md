@@ -572,7 +572,30 @@ vgdisplay vg_bbdd_2020
 lvextend -l +100%FREE /dev/mapper/vg_bbdd_2020-lv_bbdd_2020
 resize2fs -p /dev/mapper/vg_bbdd_2020-lv_bbdd_2020
 ````
+### Ejemplo completo crear dos discos y ampliar el lvm despues d ecreado
+````sh
+mkdir /srv/respaldo
+apt install parted
+parted --align optimal -s /dev/xvde "mklabel gpt unit mib mkpart primary 0% 100% set 1 lvm on print"
+parted --align optimal -s /dev/xvdf "mklabel gpt unit mib mkpart primary 0% 100% set 1 lvm on print"
+pvs
+pvdisplay
+pvcreate /dev/xvde1
+pvcreate /dev/xvdf1
+vgs
+vgcreate vg_srv_respaldo /dev/xvde1
+lvcreate -l +100%FREE vg_srv_respaldo  -n lv_srv_respaldo
+vgs
+vgextend vg_srv_respaldo /dev/xvdf1
+vgs
+lvresize -l +100%FREE /dev/vg_srv_respaldo/lv_srv_respaldo
+mkfs.ext4 /dev/mapper/vg_srv_respaldo-lv_srv_respaldo
+tune2fs -U random -L "lv_srv_respaldo" /dev/mapper/vg_srv_respaldo-lv_srv_respaldo
+mount /dev/mapper/vg_srv_respaldo-lv_srv_respaldo /srv/respaldo
+echo "/dev/mapper/vg_srv_respaldo-lv_srv_respaldo /srv/respaldo            ext4    defaults        0       2" >> /etc/fstab
+````
 
+	
 
 ## NFS Linux
 ###Servidor 
