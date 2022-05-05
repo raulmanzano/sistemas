@@ -759,11 +759,12 @@ cat /var/log/kern.2018-12-05.log | grep Nueva | grep UDP | cut -d' ' -f12 | cut 
 ````
     
 # rsync
+````sh
 -n dry-run
 -r recursivo
 -z compresion
 -a archive mode, preserva metadatos
-````sh
+La barra al final del directorio de origen indica el contenidos de ese directorio y no desde el directorio padre
 rsync -n -avz --delete --itemize-changes --numeric-ids username@remote_host:/home/username/dir1 place_to_sync_on_local_machine
 ````
 
