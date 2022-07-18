@@ -1,0 +1,49 @@
+
+
+
+ 
+
+Descargar plugin archetype
+	mvn archetype:generate
+
+
+repositorio C1NN de arquetipos
+	preferencias maven
+		-nuevo repositorio http://192.168.25.128:8081/nexus/content/repositories/releases/archetypes.xml
+
+
+Nuevo proyecto (con el plugin de eclipse)
+
+	Nuevo proyecto maven
+		-no indicar que cree uno por defecto 
+		-seleccionar el arquetipo del repositorio de arquetipos c1NN
+			es.uniovi.innova.liferay523
+			snapshot el que queda
+
+Nuevo proyecto (desde DOS)
+	mvn archetype:generate -DarchetypeCatalog=http://192.
+	168.25.128:8081/nexus/content/repositories/releases/archetypes.xml
+
+
+para generar el jar o el war->sobre el POM, Run as/maven:package
+para desplegar el jar o el war->sobre el POM
+	-configuracion de run as
+	-Goal:install y profiles devel o integration(son los ficheros pom-xxx.properties que hay ahi)
+
+desde dos seria maven deploy -P perfil
+
+
+Compartir en el svn
+	añadir ignores el target
+
+modificar las preferencias locales
+	en pom-devel.properties
+
+
+
+
+
+
+
+
+

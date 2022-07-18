@@ -1,0 +1,310 @@
+ 20180921- CheatSheet - Migración maquinas
+
+____________________________________________________________________________________________________________
+
+WEBUNIOVI02 16GB - 1H 20m de exportacion y 10m de importacion
+BBDD02 40GB
+BBDD04 50GB
+NAS04 15GB
+NAS02 15GB
+
+______________________________________________________________________________________________
+
+
+OK - Previo - Dia ante
+	Sincronizacion sobre el NAS00 para que se a mas rápida
+		(Parametro -n para pruebas)
+			Cuado se pase al NAS00 no se van a monatr todos los discos a la vez
+				rsync -avn --itemize-changes --numeric-ids --delete --exclude="colab" --exclude="repouniovi" /srv/nfs/replicacion/NAS-04/srv/nfs/ /var/tmp/xvdm1/
+				rsync -avn --itemize-changes --numeric-ids --delete  /srv/nfs/replicacion/NAS-04/srv/nfs/colab/ /var/tmp/xvdm1/
+				rsync -avn --itemize-changes --numeric-ids --delete  /srv/nfs/replicacion/NAS-04/srv/nfs/repouniovi/ /var/tmp/xvdm1/
+	Los discos se dejarán montados en CLONADOR 25.33
+
+OK - Montar NFS compartido NAS03
+	 cat /etc/exports
+		/srv/nfs/respaldo/migracion/        192.168.25.225(rw,sync,fsid=root,crossmnt,no_subtree_check,no_root_squash)
+		/srv/nfs/respaldo/migracion/        192.168.10.145(rw,sync,fsid=root,crossmnt,no_subtree_check,no_root_squash)
+
+OK - Montar NFS compartido NAS00
+ 	cat /etc/exports
+		/srv/nfs/respaldo/migracion/        192.168.25.221(rw,sync,fsid=root,crossmnt,no_subtree_check,no_root_squash)
+		/srv/nfs/respaldo/migracion/        192.168.10.147(rw,sync,fsid=root,crossmnt,no_subtree_check,no_root_squash)
+
+OK - XenServer011 - Montar NAS00 destino de exportaciones	
+	  mkdir /mnt/migracion
+  	  mount -t nfs4 192.168.25.190:/ /mnt/migracion -vvv  	  
+
+OK - XenServer015 - Montar NAS03 destino de exportaciones
+	  mkdir /mnt/migracion
+  	  mount -t nfs4 192.168.25.193:/ /mnt/migracion -vvv
+
+OK - XenServer145 - Montar NAS03 destino de exportaciones	
+	  mkdir /mnt/migracion
+  	  mount -t nfs4 192.168.25.193:/ /mnt/migracion -vvv
+
+OK - XenServer147 - Montar NAS00 destino de exportaciones	
+	  mkdir /mnt/migracion
+  	  mount -t nfs4 192.168.25.190:/ /mnt/migracion -vvv
+
+OK - NAS04 - Recerar discos(Crear y recrear)
+	Los discos están montados en CLONADOR 25.33 (3 discos diferentes) para hacer el Rsync final y actualizados del sia antes
+
+OK - NAS02 - Recerar discos(Crear y recrear)	
+	Los discos están montados en CLONADOR 25.33 (1 disco) y actualizados del sia antes
+
+
+
+XENPOOLC1NN - Parar maquinas virtuales Todo menos NAS02, NAS04 , Clonador y servicios de infraestructura (licencias y Controlador de dominio) en XENPOOLC1NN
+
+
+NAS04 - RSYNC
+	Desde CLONADOR 25.33 rsync al NAS04 origen a un disco local montado en CLONADOR
+		Montar los discos virtuales mediante el xenServer(esto ya debería de estar)
+		Ver que identificador de montaje (device path) en el storage del Xenserver o del df -h coincide con el nombre del VDI en el xenserver
+		Rsync
+			(Parametro -n para pruebas)
+				rsync -avzn --itemize-changes --numeric-ids --delete --exclude="colab" --exclude="repouniovi" 192.168.25.194:/srv/nfs/ /var/tmp/xvdi1XXXXX/
+				rsync -avzn --itemize-changes --numeric-ids --delete  192.168.25.194:/srv/nfs/colab/ /var/tmp/xvdj1XXXXX/
+				rsync -avzn --itemize-changes --numeric-ids --delete  192.168.25.194:/srv/nfs/repouniovi/ /var/tmp/xvdk1XXXXX/
+		Desmontar los discos de Clonador		
+			umount /var/tmp/xvdi1XXXXX/
+			umount /var/tmp/xvdj1XXXXX/
+			umount /var/tmp/xvdk1XXXXX/
+		Entrar en xenserver, clonador: opciones "deactivate" y "deatach" a los 3 VDI
+
+
+NAS02 - RSYNC
+	Desde CLONADOR 25.33 rsync al NAS02 origen a un disco local montado en CLONADOR
+		Montar los discos virtuales mediante el xenServer (esto ya debe´ria de estar)
+		Ver que identificador de montaje (device number) en el storage del Xenserver o del df -h
+		Rsync
+			(Parametro -n para pruebas)
+				rsync -avzn --itemize-changes --numeric-ids --delete --exclude="colab" --exclude="repouniovi" 192.168.25.192:/srv/nfs/webuniovi/ /var/tmp/xvdl1XXXXX/ [Revisar rutas]
+		Desmontar los discos de Clonador		
+			umount /var/tmp/xvdl1XXXXX/
+		Entrar en xenserver, clonador: opciones "deactivate" y "deatach" a los 1 VDI(Para asegurar que no los clona)
+
+
+
+NAS02 - DESMONTAR DISCOS DE ORIGEN
+		1 disco 
+		utilizar la declaracion en /etc/fstab de montaje automarico en arranque
+			umount /srv/nfs/webuniovi
+		Entrar en xenserver, clonador: opciones "deactivate" y "deatach" a los 1 VDI
+
+NAS04 - DESMONTAR DISCOS DE ORIGEN
+		3 discos (hay que hacerlo en orden) aqui son 3 discos tambien y en las copias de seguridad es 1 solo
+		utilizar la declaracion en /etc/fstab de montaje automarico en arranque
+			umount /srv/nfs/colab
+			umount /srv/nfs/repouniovi
+			umount /srv/nfs/
+		Entrar en xenserver, clonador: opciones "deactivate" y "deatach" a los 1 VDI(Para asegurar que no los clona)
+
+
+
+_____________________________________________________Paralelo
+______________________________swimlane 02____________________________________________________
+BBDD02 - EXPORTAR
+NAS02 - EXPORTAR
+BBDD02 - IMPORTAR
+NAS02 - IMPORTAR
+BBDD02 - Reajustar interfaces de red 
+BBDD02 - ARRANCAR
+BBDD02 - Xentools
+NAS02 - Reajustar interfaces de red(No arrancar)
+NAS02 - montar discos
+	Montar discos en las maquinas sin arrancar 
+		Xenserver hacer un "attach". Hay que hacerlo en orden para que el DEV PATH sea el mismo que existía
+			NAS 02
+				disco_nas-02_3_particion_srv_nfs_webuniovi	/dev/xvdd
+NAS02 - ARRANCAR
+	>>>>Al arrancar las maquinas debería de montar los discos automáticamente y deben de quedar en el orden
+	>>>>revisar datos de montaje si son coherentes	
+		Ver nivel de anidación de los origenes - Ver nivel de anidación de los discos recien montados
+			NAS02
+				/srv/nfs/webuniovi/
+							lost+found
+							NAS-02_srv_nfs_webuniovi.txt
+							var
+							webuniovi_borrable		
+NAS02 - Xentools
+______________________________swimlane 04____________________________________________________
+BBDD04 - EXPORTAR
+NAS04 - EXPORTAR
+NAS04 - IMPORTAR
+BBDD04 - IMPORTAR
+BBDD04 - Reajustar interfaces de red
+BBDD04 - ARRANCAR
+BBDD04 - Xentools	
+NAS04 - Reajustar interfaces de red(No arrancar)
+NAS04 - montar discos
+	Montar discos en las maquinas sin arrancar 
+		Xenserver hacer un "attach". Hay que hacerlo en orden para que el DEV PATH sea el mismo que existía
+			NAS 04
+				disco_nas-04_3_particion_srv_nfs	/dev/xvdd
+				disco_nas-04_4_particion_srv_nfs_colab	/dev/xvde
+				disco_nas-04_5_particion_srv_nfs_repouniovi	/dev/xvdf
+NAS04 - ARRANCAR
+	>>>>>Al arrancar las maquinas debería de montar los discos automáticamente y deben de quedar en el orden
+	>>>>revisar datos de montaje si son coherentes	
+		Ver nivel de anidación de los origenes - Ver nivel de anidación de los discos recien montados
+			NAS04
+				/srv/nfs/
+					colab/
+						lost+found/
+						NAS-04_colab.txt
+						.nfscheck
+						var/
+					euniovi/
+					institutocies/
+					lost+found/
+					personales/
+					portales/
+					portalinvestigadores/
+					repoc1nn/
+					repouniovi/
+						lost+found/
+						var/
+NAS04 - Xentools	
+
+___________________________________________________Fin paralelo
+
+Arrancar maquinas clientes
+Verificar que se puede escribir entre las maquinas clientes y los NAS
+
+
+
+
+
+
+
+
+
+
+_________Notas En caso de desastre ___________________________________________________________
+Recordar montar nuevamente los discos en los NAS origen antes de arrancarlos
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+_________________________________________________________________________________________________
+_________________________________________________________________________________________________
+_________________________________________________________________________________________________
+
+___NFS__________________________________________________________________
+
+Servidor 
+	showmount -e 
+		Muestra lo que hay exportado en el servidor	(local)
+	exportfs -v 
+		Muestra lo que hay exportado en el servidor (local)
+	cat /etc/exports
+		Muestra lo que hay indicado para exportar
+ 			/srv/nfs/                192.168.24.0/23(rw,sync,fsid=root,crossmnt,no_subtree_check,no_root_squash)
+			/srv/nfs/respaldo/migracion/        192.168.25.221(rw,sync,fsid=root,crossmnt,no_subtree_check,no_root_squash)			
+			##parece ser que en ocasiones es mejor indicar la maquina que va a acceder, como por ejemplo en las maquinas XenServers
+
+	service nfs restart
+		Reinicia el servicio
+
+
+
+
+Cliente
+	showmount -e 192.168.25.190 
+		Muestra lo que hay exportado en el servidor	remoto
+
+ 	mount -t nfs4 192.168.25.190:/ /mnt/migracion -vvv 		
+ 	mount -t nfs4 192.168.25.190:/ /mnt/migracion -vvv
+ 		Mejor indicar el tipo para evitar problemas como en los servidores Xenserver
+ 		Origen -> destino El origen empieza la ruta desde los indicado en el /etc/exports del servidor
+ 		Puede ser que no se localice la maquina cliente a si mismo por el nombre . Hay que incluir en el /etc/hosts
+
+ 	umount -f -l PATH
+ 		Para desmontar
+
+ 	cat /etc/fstab
+ 		Dispositivos montados durante el arranque
+
+______________________________________
+ 
+
+
+
+___Importacion exportacion____________________________________________________________________________________
+
+xe vm-export preserve-power-state=false vm="WebUniovi-05 (Intranet) [192.168.25.185]" filename=/mnt/migracion/WebUniovi-05.XVA
+xe vm-import filename=/mnt/migracion/WebUniovi-05.XVA force=true sr-uuid=67cc10b2-5d87-3aa2-99fe-f665c8442878 preserve=true
+
+dpkg --purge xe-guest-utili
+Las tool santiguas están instaladas en 
+	/root/Administracion 
+	/usr/local/src
+
+
+Hay que meter el CD en la parte superior del XenTools (parece ser que en versiones mas recentes ya lo hace autometicamente)
+
+mkdir /mnt/xentools
+mount -o ro,exec /dev/disk/by-label/XenServer\\x20Tools /mnt/xentools
+	blkid -t LABEL="XenServer Tools"
+/mnt/xentools/Linux/install.sh
+umount /mnt/xentools
+
+
+Eliminar los interfaces de red que existen y AÑadir por ORDEN los interfaces de red
+	Red C1NN-MGR (debe ser la 0)
+	Red C1NN-LAN (debe ser la 1)
+	Red C1NN-DMZ (debe ser la 2)
+
+
+
+
+
+
+
+
+
+
+___________________________________Indica espacio insuficiente
+# Create snapshot
+xe vm-snapshot vm="WebUniovi-02 (Intranet) [192.168.25.142]" new-name-label=snapshot_backup_142
+
+# Set as VM not template
+xe template-param-set is-a-template=false uuid=XXXUIDXXXX
+
+# Export
+xe vm-export vm=XXXUIDXXXX filename=""
+
+# Delete snapshot
+xe vm-uninstall uuid=XXXUIDXXXX force=true
+
+___________________________________________________________para instalar el xe-tools mediante apt -> no se puede por el tipo de instalacion
+apt-cache search xe-guest-utilities
+apt-cache show xe-guest-utilities
+apt-cache policy xe-guest-utilities
+sed '1 {s/^/#/}' /etc/apt/apt.conf > /etc/apt/apt.conf
+apt-get update 
+
+sudo apt install xe-guest-utilities=XXXXXX
+
+
+
+apt-get purge --autoremove 
+apt-get purge --autoremove 
+_________________________________________________________
+
+
+

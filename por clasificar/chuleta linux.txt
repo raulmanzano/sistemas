@@ -1,0 +1,141 @@
+[[Chuleta linux]]
+
+
+
+	Montar para escritura la particion raiz cuando es de solo lectura
+		mount -o rw,remount /
+	
+
+
+
+
+
+
+	
+	
+[[Ubuntu]]
+		recuperacion del login root
+			Please edit /etc/lightdm/lightdm.conf, append two lines as the following:
+			greeter-show-manual-login=true
+			allow-guest=false
+			And then reboot your Ubuntu, you can input any username to login the system, include root user. If you do not set root password, please use sudo passwd to set new password for root user.		
+		
+		Disable root
+			sudo passwd -l root
+	
+		Borrar usuario
+			deluser -remove-all-files manzano
+		Añadir usuario
+			useradd -d /home/manzano -m manzano
+			chown manzano:manzano /home/manzano
+			chmod 700 /home/manzano
+		
+		Modificar para añadir a grupo sudo
+		sudo usermod -aG sudo <username>
+
+
+
+
+
+
+
+
+
+
+
+SVN
+
+svn status
+svn --username=raul commit
+svn add
+
+
+copiar con scopy
+ scp -r root@192.168.25.133:/var/lib/tomcat5.5/webapps/ ./webapps
+
+
+Mover archivos
+mv 
+
+Cambiar dueño de fichero
+chown -R usuario:grupo /ruta/archivo
+
+
+Monitorizar archivo de log
+tail -f /var/lib/tomcat5.5/logs/catalina_2008-10-27.log
+
+
+
+Empaquetar: tar -cvf archivo.tar /dir/a/comprimir/
+Desempaquetar: tar -xvf archivo.tar
+Ver contenido tar -tf archivo.tar
+
+* Ficheros gz
+Comprimir: gzip -9 fichero
+Descomprimir: gzip -d fichero.gz
+
+unzip xxxx.zip -d ./apps
+
+war y jar
+jar -xvf webApplicationfilename.war
+
+
+
+enlace simbolico
+ln -sf /cygdrive/d/buzon/fotos fotos
+
+
+
+
+[Postgres]
+/etc/postgresql/8.3/main/
+
+-iniciar,parar
+/etc/init.d/postgresql-8.3 stop|stop
+
+-trabajar
+	cambiar a usuario postgres
+		su - postgres
+	llamar al interfaz de comandos
+		psql
+
+
+		//se indica base de datos , usuario para el GRANT y host para que haga la validacion sin el IDEN
+
+psql -d liferayweb03Integracion -U liferayweb03Integracion -h 127.0.0.1 < /root/liferayweb03.sql
+
+		
+-para configuracion de acceso editar  pg_hba.conf
+	 emacs -nw pg_hba.conf
+ 
+	 
+_________________
+CREATE DATABASE lportal52 WITH OWNER = postgres ENCODING = 'UTF8' TABLESPACE = pg_default;
+GRANT TEMPORARY ON DATABASE lportal52 TO public;
+GRANT ALL ON DATABASE lportal52 TO postgres;
+GRANT ALL ON DATABASE lportal52 TO liferay52;
+
+----
+CREATE ROLE liferay LOGIN
+  NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE;
+
+
+  
+  
+psql -d intranetalsa -U liferayuser -h 127.0.0.1 
+
+liferayC1NN
+ALTER TABLE items ALTER COLUMN template SET DEFAULT false;
+
+ALTER TABLE poll_answers add constraint UQ_poll_assignment UNIQUE(coordination_asssignment_id,poll_id)
+
+
+pg_dump --format=p --file=intranetalsa_backup.sql intranetalsa
+pg_dump --format=p --file=lportal_backup.sql lportal
+pg_dumpall --file=todo.sql
+__________________________________________________________________________________
+
+
+
+
+

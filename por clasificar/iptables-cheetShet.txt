@@ -1,0 +1,32 @@
+iptables -L
+iptables -L --line-numbers    [lista configuracion con numeros de linea]
+iptables -D LOGGING 1			[Alimina configuracion del apartado indicando la linea]
+
+iptables -F       elmina reglas de todas las CHAINS
+iptables -X LOGGING       elmina CHAIN definida por el usuario
+
+
+OJO!!!!! el uso de lso diferentes modulos con -m es importante se aplican en ese orden, no son el mismo filtro
+
+
+iptables -N LOGGING
+iptables -A LOGGING -d 127.0.0.1 -j RETURN
+iptables -A LOGGING -d 192.168.25.185 -j RETURN
+iptables -A LOGGING -d 156.35.33.185 -j RETURN
+iptables -A LOGGING -p tcp -m state --state NEW -m limit --limit 1/minute --limit-burst 5 -j LOG --log-prefix "Nueva conexion OUTGOING TCP: "
+iptables -A LOGGING -p udp -m state --state NEW -m limit --limit 1/minute --limit-burst 5 -j LOG --log-prefix "Nueva conexion OUTGOING UDP: "
+iptables -A OUTPUT -j LOGGING
+
+
+
+
+
+cat /var/log/kern.2018-12-05.log | grep Nueva | grep UDP | cut -d' ' -f12 | cut -d'=' -f2 > traficoUDP-185-temp.txt
+cat /var/log/kern.log | grep Nueva | grep UDP | cut -d' ' -f12 | cut -d'=' -f2 >> traficoUDP-185-temp.txt
+cat traficoUDP-185-temp.txt | sort -n | uniq -c | sort -n > traficoUDP-185.txt
+rm -f traficoUDP-185-temp.txt
+
+cat /var/log/kern.2018-12-05.log | grep Nueva | grep TCP | cut -d' ' -f12 | cut -d'=' -f2 > traficoTCP-185-temp.txt
+cat /var/log/kern.log | grep Nueva | grep TCP | cut -d' ' -f12 | cut -d'=' -f2 >> traficoTCP-185-temp.txt
+cat traficoTCP-185-temp.txt | sort -n | uniq -c | sort -n > traficoTCP-185.txt
+rm -f traficoTCP-185-temp.txt

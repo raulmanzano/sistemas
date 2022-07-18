@@ -1,0 +1,927 @@
+
+Copias de seguridad 2020:________________________________________________
+
+sudo gedit /etc/cron.weekly/copiaseguridad.sh
+	#!/bin/sh
+	## copia el gdrive al acumulativo
+	sudo -u manzano -c "rsync -vazhi  --iconv=iso88591,utf8  --modify-window=1 --stats /home/manzano/google-drive/ManzaDocSync/* /mnt/RECURSOS2/ManzaDocSync-Stored/"/
+	
+	## Syncroniza lo de recursos al silverBAck externo
+	sudo rsync -vazhin --iconv=iso88591,utf8 --modify-window=1 --stats /mnt/RECURSOS1/musica/ /mnt/silverback/musica/
+	sudo rsync -vazhin --iconv=iso88591,utf8 --modify-window=1 --stats /mnt/RECURSOS2/* /mnt/silverback/ --exclude='Silvia + Manza.zip'
+
+sudo chmod +x /etc/cron.weekly/copiaseguridad.sh 
+
+
+
+
+Copias de seguridad:________________________________________________dry-run 
+
+sudo gedit /etc/cron.weekly/copiaseguridad.sh
+	#!/bin/sh
+	## copia el gdrive al acumulativo
+	sudo rclone copy gdrive:ManzaDocSync /mnt/recursos2/ManzaDocSync-Stored -v
+	## Syncroniza lo de recursos al silverBAck externo
+	sudo rsync -vazhi --iconv=iso88591,utf8 --modify-window=1 --stats /mnt/recursos1/musi* /mnt/silverback/ 	
+	sudo rsync -vazhi --iconv=iso88591,utf8 --modify-window=1 --stats /mnt/recursos2/* /mnt/silverback/ --exclude='Silvia + Manza.zip'
+
+sudo chmod +x /etc/cron.weekly/copiaseguridad.sh 
+
+
+
+google-drive-ocamlfuse 2020 ____________________________________________(alternativa al rclone)
+sudo add-apt-repository ppa:alessandro-strada/ppa
+sudo apt install google-drive-ocamlfuse
+# haber un navegador para la validacion
+google-drive-ocamlfuse
+mkdir ~/google-drive
+google-drive-ocamlfuse ~/google-drive 
+##fusermount -u ~/google-drive
+
+
+habría que hacer un automount
+
+
+
+RCLONE ___________________________________________
+
+se puede interaccionar de varias maneras configurando la unidad o operando directamente sobr eella
+Para copiar desde la unidad a un destino
+	sudo rclone copy gdrive:ManzaDocSync /mnt/recursos2/ManzaDocSync-Stored -v --dry-run
+
+
+Para instalar el programa y montar una unidad mediante servicios
+
+curl https://rclone.org/install.sh |sudo bash
+rclone config
+	Decir a todo que si, especificar un nombre para la referencia al repositorio remoto y abrir el navegador para autorizar
+	Seleccionar auto en la configuracion
+sudo rclone lsd gdrive: 
+sudo cat /home/manzano/.config/rclone/rclone.conf	
+mkdir /mnt/gdrive
+sudo nano /etc/systemd/system/rclone.service
+	# /etc/systemd/system/rclone.service
+
+[Unit]
+Description=Google Drive (rclone)
+AssertPathIsDirectory=/mnt/gdrive
+After=network-online.target
+ 
+[Service]
+Type=simple
+ExecStart=/usr/bin/rclone mount \
+        --config=/home/manzano/.config/rclone/rclone.conf \
+        --allow-other \
+        --cache-tmp-upload-path=/tmp/rclone/upload \
+        --cache-chunk-path=/tmp/rclone/chunks \
+        --cache-workers=8 \
+        --cache-writes \
+        --cache-dir=/tmp/rclone/vfs \
+        --cache-db-path=/tmp/rclone/db \
+        --no-modtime \
+        --drive-use-trash \
+        --stats=0 \
+        --checkers=16 \
+        --bwlimit=40M \
+        --dir-cache-time=60m \
+        --cache-info-age=60m gdrive:/ /mnt/gdrive
+ExecStop=/bin/fusermount -u /mnt/gdrive
+Restart=always
+RestartSec=10
+ 
+[Install]
+WantedBy=default.target
+
+	
+sudo systemctl start rclone
+sudo systemctl status rclone.service 
+sudo systemctl enable rclone.service 
+ls /mnt/gdrive/
+
+
+
+
+_________________________________________________
+
+sudo lsblk -o NAME,LABEL
+sudo lsblk -O
+
+_______________________________________
+export HISTCONTROL=erasedups
+export HISTSIZE=10000
+shopt -s histappend
+
+
+
+Rsync __________________________________
+
+sudo rsync -vazhi --modify-window=1 --stats /mnt/wdgris/POR* /mnt/recursos2/ --exclude='*nombrearchivo.*'
+
+
+-a implica varias opciones juntas
+-z comprimido
+-h para humanos
+
+-i para la informacion de lo que compara
+--dry-run o -n para que no realice la ejecucion realmente
+--stats estadisticas al final
+--modify-window=1 , para splucionar un problema de comparar diferencias de representacion de tiempo entre diferentes sistemas
+
+
+YXcstpoguax.
+Y será alguna de las siguientes opciones,
+	< el archivo se envía al directorio origen
+	> el archivo se envía al directorio destino
+	c se produce un cambio local
+	h se trata de un enlace duro
+	. esa opción no se modifica
+X será una de estas opciones,
+	f para archivo
+	d para directorio
+	L para enlace simbólico
+	D para dispositivo
+	S archivo especial
+c significa que tienen distintos checksum
+s significa que tienen diferentes tamaños.
+t diferentes fechas y/o hora
+p diferentes permisos
+o diferente propietario
+g diferente grupo
+u está reservado para un posible uso.
+a cambia la información ACL
+x cambia la información de atributos extendidos.
+
+
+Problemas para instalar PLEX____________________________________
+sudo systemctl stop plexmediaserver.service
+sudo systemctl status plexmediaserver.service
+sudo dpkg -r plexmediaserver
+sudo dpkg --purge plexmediaserver
+sudo dpkg --renove plexmediaserver
+sudo rm -R /var/lib/plexmediaserver
+sudo rm -R /usr/lib/plexmediaserver
+
+sudo find . -name "plex*"
+sudo apt-get clean
+sudo apt-get autoclean
+sudo apt-get update && sudo apt-get upgrade
+
+
+
+
+sudo dpkg -i  plexmediaserver*.deb
+sudo systemctl start plexmediaserver.service
+sudo systemctl status plexmediaserver.service
+sudo journalctl -xe
+tail -f /var/lib/plexmediaserver/Library/Application\ Support/Plex\ Media\ Server/Logs/Plex\ Media\ Server.log
+	sudo nano /etc/systemd/system/multi-user.target.wants/plexmediaserver.service
+	sudo chown -R manzano:manzano /var/lib/plexmediaserver
+
+Hay que reclamar el servidor localmente
+	abrir en local con un navegador o hacer un ssh tunnerl https://www.skyverge.com/blog/how-to-set-up-an-ssh-tunnel-with-putty/ 
+
+
+
+Servicios instalados____________________________________________________________
+
+/etc/systemd/system/deluged.service 
+	[Unit]
+	Description=Deluge Bittorrent Client Daemon
+	After=network-online.target
+	[Service]
+	Type=simple
+	User=deluge
+	Group=deluge
+	UMask=007
+	ExecStart=/usr/bin/deluged -d -l /var/log/deluge/daemon.log -L warning
+	Restart=always
+	# Configures the time to wait before service is stopped forcefully.
+	TimeoutStopSec=300
+	[Install]
+	WantedBy=multi-user.target
+
+/etc/systemd/system/deluge-web.service 
+	[Unit]
+	Description=Deluge Bittorrent Client Web Interface
+	After=network-online.target
+	[Service]
+	Type=simple
+	User=deluge
+	Group=deluge
+	UMask=027
+	ExecStart=/usr/bin/deluge-web -l /var/log/deluge/web.log -L warning
+	Restart=always
+	[Install]
+	WantedBy=multi-user.target
+
+/etc/systemd/system/jd2.service 
+	[Unit]
+	Description = JDownloader2 Service
+	After = network.target
+
+	[Service]
+	Environment = /opt/jd2
+	Type = simple
+	ExecStart = /usr/bin/java -Djava.awt.headless=true -jar /opt/jd2/JDownloader.jar
+	RemainAfterExit = yes
+	User = jd2
+	Group = nogroup
+
+	[Install]
+	WantedBy = multi-user.target
+
+/etc/systemd/system/noip2.service 
+	# 1) Install binary as described in no-ip.com's source file (assuming results in /usr/local/bin)
+	# 2) Run sudo /usr/local/bin/noip2 -C to generate configuration file
+	# 3) Copy this file noip2.service to /etc/systemd/system/
+	# 4) Execute `sudo systemctl enable noip2`
+	# 5) Execute `sudo systemctl start noip2`
+	#
+	# systemd supports lots of fancy features, look here (and linked docs) for a full list:
+	#   http://www.freedesktop.org/software/systemd/man/systemd.exec.html
+
+	[Unit]
+	Description=No-ip.com dynamic IP address updater
+	After=network.target
+	After=syslog.target
+
+	[Install]
+	WantedBy=multi-user.target
+	Alias=noip2.service
+
+	[Service]
+	# Start main service
+	ExecStart=/usr/local/bin/noip2
+	#ExecStart=/bin/sh -ec "exec /usr/local/bin/noip2"
+	#Restart=always
+	Restart=on-failure
+	Type=forking
+
+/etc/systemd/system/radarr.service
+	[Unit]
+	Description=Radarr Daemon
+	After=syslog.target network.target
+
+	[Service]
+	User=root
+	Group=root
+	Type=simple
+	ExecStart=/usr/bin/mono /opt/Radarr/Radarr.exe -nobrowser
+	TimeoutStopSec=20
+	KillMode=process
+	Restart=on-failure
+
+	[Install]
+	WantedBy=multi-user.target
+
+
+/lib/systemd/system/jackett.service
+	[Unit]
+	Description=Jackett Daemon
+	After=network.target
+
+	[Service]
+	Environment=XDG_CONFIG_HOME=/opt/JackettConfig 
+	User=jackett
+	Restart=always
+	RestartSec=5
+	Type=simple
+	ExecStart=/usr/bin/mono --debug /opt/jackett/JackettConsole.exe
+	TimeoutStopSec=20
+
+	[Install]
+	WantedBy=multi-user.target
+
+
+/lib/systemd/system/sonarr.service
+	[Unit]
+	Description=Sonarr Daemon
+	After=syslog.target network.target
+
+	[Service]
+	User=nzbdrone
+	Group=nogroup
+
+	Type=simple
+	ExecStart=/usr/bin/mono /opt/NzbDrone/NzbDrone.exe -nobrowser
+	TimeoutStopSec=20
+	KillMode=process
+	Restart=on-failure
+
+	[Install]
+	WantedBy=multi-user.target
+
+
+/lib/systemd/system/plexmediaserver.service 
+	[Unit]
+	Description=Plex Media Server for Linux
+	After=network.target network-online.target
+
+	[Service]
+	Environment="PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR=/var/lib/plexmediaserver/Library/Application Support"
+	Environment=PLEX_MEDIA_SERVER_HOME=/usr/lib/plexmediaserver
+	Environment=PLEX_MEDIA_SERVER_MAX_PLUGIN_PROCS=6
+	Environment=PLEX_MEDIA_SERVER_TMPDIR=/tmp
+	ExecStartPre=/bin/sh -c '/usr/bin/test -d "${PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR}" || /bin/mkdir -p "${PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR}"'
+	ExecStart=/bin/sh -c 'LD_LIBRARY_PATH=/usr/lib/plexmediaserver "/usr/lib/plexmediaserver/Plex Media Server"'
+	Type=simple
+	User=plex
+	Group=plex
+	Restart=on-failure
+	RestartSec=5
+	StartLimitInterval=60s
+	StartLimitBurst=3
+
+	[Install]
+	WantedBy=multi-user.target
+
+Start servidores___________________________________________
+#!/bin/bash 
+echo "arrancando deluge-web"  
+sudo systemctl start deluge-web.service
+echo "arrancando deluged"  
+sudo systemctl start deluged.service
+echo "arrancando jackett"  
+sudo systemctl start jackett.service
+echo "arrancando jd2"  
+sudo systemctl start jd2.service
+echo "arrancando radarr"  
+sudo systemctl start radarr.service
+echo "arrancando sonarr"  
+sudo systemctl start sonarr.service
+echo "arrancando plexmediaserver"  
+sudo systemctl start plexmediaserver.service
+echo "arrancando postgresql"  
+sudo systemctl start postgresql.service
+echo "arrancando tomcat7"  
+sudo systemctl start tomcat7.service
+echo "arrancandos !!!!!!!"  
+
+
+
+
+Instalar play on linux_______________________________
+sudo apt-get remove playonlinux 
+sudo apt-get remove wine*
+sudo dpkg --add-architecture i386
+wget https://dl.winehq.org/wine-builds/Release.key
+sudo apt-key add Release.key
+sudo apt-add-repository https://dl.winehq.org/wine-builds/ubuntu/
+sudo apt-get update
+wine --version
+sudo apt-get install winbind
+sudo apt-get install xterm unrar-free p7zip-full
+sudo apt-get install playonlinux
+
+
+Intall crome_____________________________
+wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - 
+sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+sudo apt-get update 
+sudo apt-get install google-chrome-stable
+sudo update-alternatives 
+update-alternatives --set gnome-www-browser /usr/bin/google-chrome-stable
+sudo update-alternatives --set gnome-www-browser /usr/bin/google-chrome-stable
+update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
+sudo update-alternatives --set x-www-browser /usr/bin/google-chrome-stable
+sudo xdg-settings set default-web-browser google-chrome.desktop
+google-chrome
+
+
+Install ___________sublime,JAVA,GIT
+
+29  sudo add-apt-repository ppa:webupd8team/sublime-text-3
+  30  sudo apt-get update
+  31  sudo apt-get install sublime-text-installer
+   32  sudo apt-get purge openjdk-8-jre openjdk-8-jre-headless openjdk-7-jre gcj-4.7-base gcj-4.7-jre openjdk-6-jre-headless gcj-5-jre-headless openjdk-8-jre-headless gcj-4.8-jre-headless gcj-4.9-jre-headless openjdk-9-jre-headless
+   33  update-alternatives --java
+   34  update-alternatives --help
+   35  update-alternatives --get-selections
+   36  update-alternatives --config java
+   37  sudo add-apt-repository ppa:webupd8team/java
+   38  sudo apt update; sudo apt install oracle-java8-installer
+   39  sudo apt install git
+   40  git config --global user.email "raulmanzanoiglesias"
+   41  git config --global user.email "raulmanzanoiglesias@gmail.com"
+   42  git config --global user.name "manzano"
+   43  sudo apt install maven
+   44  sudo apt-get install postgresql postgresql-contrib
+   45  sudo apt-get install pgadmin3
+   46  sudo apt install systemd-manager
+   47  sudo apt install systemd-ui
+
+
+PPA PURGE_____________________________
+9  apt-get install ppa-purge 
+   10  sudo apt-get install ppa-purge 
+   11  sudo ppa-purge ppa:gnome3-team/gnome3
+   12  sudo ppa-purge ppa:gnome3-team/gnome3-staging
+
+
+  GRUB____________________
+   35  sudo gedit /etc/default/grub
+   33  sudo grub-set-default 3 
+   29  $ sudo update-grub
+
+
+______________________________
+
+
+SERVICES:______________________________
+
+# Traditional:
+/etc/init.d/myservice start
+# Upstart
+service myservice start
+
+
+Upstart
+/etc/init - upstart init configs
+/etc/init.d - sysvinit scripts y versiones antiguas de upstart
+/etc/init/rc-sysinit.conf - tradicional startup scripts
+/etc/default - configuration files  de sysvinit scripts and upstart 
+
+
+
+SYSTEMD Vs upstart _____________
+
+Upstart usa JOBS que son iniciados tan pronto como se pueda (utiliza la configuracion de /etc/init/)
+systemd utiliza UNITS, que comienzan cuando otras units que dependan de ella se hayan iniciado. dependen todas de una root unit (default.target)
+
+Systemd runs with PID 1 as /sbin/init.
+Upstart runs with PID 1 as /sbin/upstart o /lib/systemd/systemd.
+
+Shell scripts
+systemd no proporciona shell scripts, se pueden poner pequeñas ejecuciones
+	ExecStart=/bin/sh -ec 'echo hello'
+	NOTA: hay que poner el path completo del binario a ejecutar
+
+Automatic starting
+	Necesitan definir de quien dependen en la seccion [Install], por ejemplo WantedBy=multi-user.target
+		esto es equivalebnte a start on runlevel [2345] in upstart
+
+Invalid configurations
+	upstart - no ejecuta el script
+	systemd - ingona las secciones incorrectas pero lo ejecuta igualmente
+
+Nuevo servicio
+	Copy conf file noip2.service to /etc/systemd/system/
+	Execute `sudo systemctl enable noip2`
+	Execute `sudo systemctl start noip2`
+
+
+Override Files
+	upstart - nuevos ficheros de configuracion en  /etc/init/$job.conf
+	systemd - subdirectorio en  "/etc/systemd/system/" or "/lib/systemd/system/" called "${unit}.d/".
+			something>.conf in the "${unit}.d/" directory con las DIRECTIVAS que sean diferentes
+
+upstart commands
+	start $job
+	stop $job
+	restart $job
+	initctl list	
+	init-checkconf /tmp/foo.conf
+	cat /var/log/upstart/$job.log
+	tail -f /var/log/upstart/$job.log
+
+Systemd equivalent
+	sudo systemctl start $unit
+	sudo systemctl stop $unit
+	sudo systemctl status $unit
+	sudo systemd-analyze verify <unit_file>
+	sudo systemctl enable $unit
+	sudo systemctl restart $unit		
+	sudo journalctl -u $unit
+	sudo journalctl -u $unit -f
+
+
+Common Idioms
+
+	Para ejecutar hay que indicar el shell
+		 [Service]
+   	 	ExecStart=/bin/sh -ec "exec /usr/bin/mydaemon --date $(date)"
+   	 Para ejecutar un servicio simple en background
+   	  	[Unit]
+   		Description=blah, blah, blah
+   
+	   [Service]
+   		Type=simple
+   		# (NOTE: "Type=simple" is the default)
+   		ExecStart=/usr/bin/sleep 999
+
+
+Ejemplo para poner como servicio el noip________________
+
+# 1) Install binary as described in no-ip.com's source file (assuming results in /usr/local/bin)
+# 2) Run sudo /usr/local/bin/noip2 -C to generate configuration file
+# 3) Copy this file noip2.service to /etc/systemd/system/
+# 4) Execute `sudo systemctl enablel noip2`
+# 5) Execute `sudo systemctl start noip2`
+#
+# systemd supports lots of fancy features, look here (and linked docs) for a full list:
+#   http://www.freedesktop.org/software/systemd/man/systemd.exec.html
+
+[Unit]
+Description=No-ip.com dynamic IP address updater
+After=network.target
+After=syslog.target
+
+[Install]
+WantedBy=multi-user.target
+Alias=noip.service
+
+[Service]
+# Start main service
+ExecStart=/usr/local/bin/noip2
+Restart=always
+Type=forking
+
+
+______________________________________________________________
+EJEMPLO
+nano /etc/systemd/system/plexmediaserver.service 
+	>> acordarse de que el usuario hay que poner el usual si no tiene usuario propio para ejecutarlo
+	>> el fichero puede no encontrarse porque es un enlace simbolico a otro 
+		Created symlink from /etc/systemd/system/multi-user.target.wants/plexmediaserver.service to /etc/systemd/system/plexmediaserver.service.
+
+sudo systemd-analyze verify plexmediaserver.service >> para verificar la sintaxis
+
+sudo systemctl --system daemon-reload >> para que cargue la configuracion
+
+systemctl start plexmediaserver.service >> para arrancar
+	>> Se puede utilizar el de siempre 
+		sudo service plexmediaserver start
+sudo journalctl -u plexmediaserver.service >> para ver el log de arranque
+	ps -aux | grep plex
+
+
+_________________________________________________________________________
+Estructura de directorios_______________________________________________
+
+/ “Root,” the top of the file system hierarchy.
+/bin Binaries and other executable programs.
+/etc System configuration files.
+/home Home directories.
+/opt Optional or third party software.
+	/opt/xxx/bin
+	/opt/xxx/etc
+	/opt/xxx/lib
+	/opt/xxx/log
+/tmp Temporary space, typically cleared on reboot.
+/usr User related programs.
+/usr/bin binarios y ejecutables del usuario
+/usr/lib libraries
+/usr/local software instalado localmente que no es parte del systema
+	/usr/local/xxx/bin
+	/usr/local/xxx/etc
+	/usr/local/xxx/lib
+	/usr/local/xxx/log
+/usr/sbin
+/var Variable data, most notably log files.
+/var/log
+/boot Files needed for boot the operate system (GRUB y LILO)
+/cdrom Mount point
+/media Mount point
+/cgroup Control Groups hierarchy
+/dev devices controled by the operating system
+/export shares filesystem
+/lib System liraries
+/lib64 System liraries
+/lost+found recuperacion de ficheros
+/mnt to mount external filesystem
+/proc information about processes
+/sbin system adminitration binaries
+/selinux informacion about SELinux
+/srv data served by the system
+	/srv/www
+	/srv/ftp
+	/srv/sys
+/sys related to the linux kernel
+COMMANDS _______________________________________________________________
+
+ls,cd,pwd,cat,echo,man,exit,clear
+which - localliza los ejecutables y el orden de ejecucion
+man -k SEARCH_TERM
+mkdir directory (-p para estructuras completas)
+rmdir directory (-p para estructuras completas)
+rm -rf directory
+ls -a(all) -l(long) -F(tipos) -t(ordenado por tiempo) -c(color no necesario)
+	ls -la
+tree -d(solo directorios) -C(colorized)
+rm,cp,mv
+sort 
+	-k F (ordena por el campo F
+	-r reverse order
+	-u unique
+tar options origen -f destino
+	c create
+	x extract
+	t display table of contents
+	v verbose
+	z compresion 
+	f file el archivo
+gzip,gunzip 
+gzcat,zcat concatenate com'pressed files
+du -h -> disk usage en formato humano
+	-K en kilobytes
+file -> informacion sobre el fichero
+touch, crea el fichero o lo modifica (solo la fecha)
+shutdown, reboot, poweroff
+patterns wildcards ___________________________________
+	* - cualuqiera cosa
+	? - un caracter
+	[] - opcional
+	! negacion
+	- en un acaracter a otro a-z
+	[[:alpha:]], etc
+	\ - caracter de escape
+	
+
+VARIABLES DE ENTORNO______________________________________
+$PATH
+$PS1 - prompt
+echo 'export PS1="\u@\h \w]\$"'>> ~/.bash_profile  //para cambiar el propt del usuario
+
+EDITOR - variable que almacena el editor por defecto
+
+printenv  -muestra todas las variables
+
+PERMISOS/MODOS________________________________
+
+[tipo][permisos user, permisos group, permisos other]
+tipo(- archivo,d directorio,x ejecutable)
+permisos(- r w x )
+
+Symbolico o numeric notation
+	grupo (ugoa)
+
+Numeric es la grapa de siempre
+	700 - solo usuario
+	755 - ejecutable por todas solo editable por usuario o grupo
+	664 - modigicable por usuario y grupo , leible por todos
+	777 y 666 es malo, permisos total
+
+groups xxx -> muestra lso grupos de un usuario 
+chmod grupo[+-]permiso (EJ:chmod u+rwx,g-x fichero)
+chgrp -> cambiar de grupo
+umask -> mascara de permismos para funcionar por defecto
+	-S para simbolic
+	el primer caracter indica especial modes (avanzado)
+	0022,0002,0077,0007
+
+EDITORES_____________________________________________
+nano, joe
+vi________
+vi - funciona con 3 modos, comandos(escape), insert mode(i,a) y line mode(:)
+mover el cursor hjkl
+
+insertar i en el cursor(I al inincio), a despues del cursos, (A al final)
+x delete a caracter escribiendo
+
+dW borra una palabra
+dd delete a line
+D delete from the current position
+r remplace caracter
+cW change a word
+cc change curren line
+c$ change from current position
+yy - Yank(copy) the current line
+p paste
+u undo
+CTRL+R redu
+/ pattern - search
+	? pattern - reverse search
+	n y N para desplazarse
+
+
+
+:w y :w! guarda
+:q quita, :q! quita sin guardar
+:wq! es lo mismo que :x
+:n posicionarse en linea
+:$ al final
+:set nu - activa numeros de linea (nonu desactiva)
+:help
+
+emacs____
+C- control
+M- Alt
+
+C-k cut
+c-y paste
+c-x u undo
+c-s search
+c-r reverse search
+
+
+Compare files___
+diff
+sdiff	side by side
+vimdiff resaltado 
+
+find _______________________________________
+
+find
+	-name *Ejemplo - 
+	-iname *ejemplo - pattern ignore cases
+	-ntime +10 -ntime -13 -> mas de 10 dias y menos de 13
+	-size +1G - mas de un giga
+	-newer xx - newer than the file xxx
+	-typoe d -> directorios
+	-exec command {} \; - run commend against the files
+locate (busca en un indice) puede no estar indexado
+
+I/O________________________________________
+stin 0
+stdout 1
+stderr 2
+>> append
+>
+< redirect input
+/dev/null salida nula
+
+ficheros de texto_____________________
+
+grep pattern file -> saca las lineas que cumplen el patrón
+	-i ignore case
+	-c count
+	-n line numbers
+	-v inverted
+cut 
+	-d delimitter
+	-f N display de nth field
+
+strings saca el contenido textual de un fichero binario
+SCP SFTP __________________________________
+sftp
+	l delante de los commnados locales
+scp ruta origen user@servidor:rutaDestino
+	si no se pone usuario pilla el local
+JOBS y PROCESSES________________________________
+ps
+command & - start command in the background
+CTRL-C - kill de process
+CTRL-Z - suspend the process
+
+bg [%num] - envia al background a suspended process
+fg [%num] - trae a alante
+kill PID - mata el proceso
+jobs [%num] list jobs
+CRON______________________________________
+
+minuto hora dia mes año commando
+
+crontab file
+crontab -l -> lista 
+crontab -e -> edita
+crontab -r -> borra
+
+SUDO_________________________
+su - (con guion cambia las variables de entorno del usuario ambien)
+sudo -l -> lista los correos
+sudo -u user command
+sudo su - (con el - cambia a root con el envoroment del root
+visudo /etc/sudoers -> ficheros con permisos
+	
+HISTORY_______________________________
+history
+~/.bash_history
+~/.history
+~/.histfile
+HISTSIZE -> variable de entorno que guarda el numero de comandos
+
+!N ejecuta el comando numero N
+!! ejecuta el ultimo
+!string ejecuta el que el ultimo comando qu eempieza con string
+APT_______________________________
+
+apt-cache search string ->buscar
+apt-cache show package ->informacion
+apt-get install [-Y] package ->instalar
+	sudo apt-get install plexmediaserver --only-upgrade -> para actualizar un paquete solo	
+apt-get remove package ->eliminar
+apt-get remove purge ->eliminar configuraciontambien
+
+
+
+
+dpkg -l -> list all packages
+dpkg -i package.deb ->install
+
+SYSTEM LOG___________________________________________
+
+facilities and severities
+
+syslogd/rsyslog/syslog-ng -> daemons del syslog segun distribucion
+/etc/rsyslog.conf
+	Selector(falility.severity)(separados por comas para varios) y accion (con guion implica cacheado)
+logger -p mail.info -t mailtest "Test"
+	genera en el mail.log algo como :  fecha linuxsvr mailtest:test.
+
+/etc/logrotate.conf
+	ununtu /etc/logrotate.d/rsyslog
+	logrotate -fv /etc/logrotate.conf -> para ejecutar
+
+PARTITIONS____________________
+MBR - viejo
+GPT - nuevo y van a cambiar tambien la BIOS
+fdisk 
+	-l display devices
+	sacar la ayuda y crear las particiones MBR. Hay opcion tambien para crear una particiones GPT
+mkfs - crear un sistema de ficheros en una particion
+	mkfs -t TYPE DEVICE
+mount(umount) DEVICE MOUNT_POINT
+	mount /dev/sdb3 /opt
+df -h (disk free, para calcular el espacio libre)
+/etc/fstab
+	para persistir los mount point
+	se pueden identificar las particiones de varias maneras
+	ruta, UUID o LABEL
+		lsblk -f para sacar las etiquetas
+		sudo blkid para sacar los UUID		
+e2label /dev/sbd3 opt
+	para etiquetar las particiones
+mkswap /dev/sdb1 -> para crear particiones de intercambo
+
+GRUPOS Y USUARIOS__________________________________
+/etc/passwd -> los pass ya no están aqui
+/etc/shadow
+UID del root es 0
+Se estable el shell a jecutar por el usuario( o el programa)
+Se pueden crear usuarios del sistema que no permiten login interactivo
+useradd [options] username
+	-c comments
+	-m create home directory
+	-s /shell/path
+	-g default group
+	-G group1,gropu2
+passwd user -> establecer el password
+/etc/shel -> directorio plantilla para los directorios de usuario
+userdel 
+usermod
+/etc/group -> definicion de grupos
+/etc/gshadow -> grupos especiales
+
+groups user
+groupadd groupdel groupmod
+
+NETWORKING________________________________________________
+ip addr
+ifconfig (deprecated)
+FQDN -> full qualified name
+hostname
+	-f completo
+/etc/hostname (donde se almacena el nombre local)
+host, dig -> para sacar el dns de maquinas
+/etc/hosts
+/etc/nsswitch.conf -> almacena el orden de resolcion de los DNS
+/etc/services -> maps port numbers with names
+
+DHCP_____________________________
+
+/etc/network/interfaces
+auto  eth0
+iface eth0 inet dhcp
+
+PARA IP fija
+/etc/network/interfaces
+auto  eth0
+iface eth0 inet static
+	adress xx.xx.xx.xx
+	netmask  xx.xx.xx.xx
+	gateway xx.xx.xx.xx
+
+Se puede asignar tambien todo con el comando ip (tambien se puede hacer con ifconfig)
+	ip adress add [IP] dev [NETWOTKDEVICE]	
+	ip link set eth0 up ->para habilitarlo
+
+ifup eth0 (habilita)
+ifdown  eth0(desabilita)
+
+Para investigar problemas
+	ping, traceroute/tracepath, netstat,tcpdump(sniffing), telnet
+
+SPECIAL MODES  SETUID, stickybit , etc______________________________
+Ignorado
+
+KUNFU______________________________________________
+
+gksudo
+
+TAB para completar comandos y parametros
+sudo !! 
+	repite el ultimo comando con sudo
+!string
+	repite el ultimo comando que empiece por string
+"!*"
+	para utilizar los parametros del ultimo comando
+"!$"
+	utiliza el ultimo parametro del ultimo comando
+grep -Ev '^#|^$' conflife.conf
+	muestra el fichero de configuracion sin comentarios
+
+
+	
+
+
+
