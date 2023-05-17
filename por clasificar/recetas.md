@@ -404,6 +404,17 @@ psql -h 156.35.33.168 -U dba -d postgres -c "SELECT pg_terminate_backend(pg_stat
 
 
 
+sudo -u postgres psql -d postgres -c 'SELECT * FROM pg_stat_activity;' -P pager=off | grep extensionestramitador
+sudo -u postgres psql -d postgres -c 'SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid = 21283;'
+sudo -u postgres psql
+SHOW search_path;
+SET search_path TO myschema, public,...;  (no necesario cambiarlo)
+\c bade de datos 
+\dt extensionestramitador.sic_autorizadores_cuentascorreo (para ver informacion)
+alter table extensionestramitador.sic_autorizadores_cuentascorreo owner to tramitador; (funciona directamente)
+
+
+
 
 _____________________
 recargar la configuracion postgre
