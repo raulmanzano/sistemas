@@ -1,6 +1,19 @@
 # JDBC
 jdbc:postgresql://192.168.0.204:5432/basededatos
 
+psql -U postgres
+psql -h 156.35.233.164 -U dba -d postgres -P pager=off -c '\list'
+
+\h
+\l
+\c nombreBBDD
+\dt -> muestra tablas
+\d nombretabla
+CREATE DATABASE nombre_base_de_datos;
+\q
+
+
+
 # Ejemplo bbdd
 
 ````sql
