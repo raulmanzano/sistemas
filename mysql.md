@@ -1,6 +1,16 @@
 #jdbc
 jdbc:mysql://localhost:3306/BBDD
 
+sudo mysql -u root -p
+\h
+SHOW DATABASES;
+USE nombre_base_de_datos;
+SHOW TABLES;
+CREATE DATABASE nombre_base_de_datos;
+EXIT;
+
+
+
 #gestion
 mysql workbench
 
